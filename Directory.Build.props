@@ -5,6 +5,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+    <PackageReference Include="MinVer" Version="2.5.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)codeanalysis.ruleset</CodeAnalysisRuleSet>
@@ -14,4 +18,9 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+  <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
+  <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+  <MinVerVerbosity>diagnostic</MinVerVerbosity>
+</PropertyGroup>
 </Project>

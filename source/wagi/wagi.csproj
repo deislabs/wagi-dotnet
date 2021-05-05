@@ -14,12 +14,15 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RootNamespace>Deislabs.WAGI</RootNamespace>
-    <RepositoryUrl>https://github.com/deislabs/wagi-dotnet.git</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>0.1.0-preview</Version>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Wasmtime" Version="0.26.0-preview1" />
     <None Include="docs\package.md" Pack="true" PackagePath="\" />

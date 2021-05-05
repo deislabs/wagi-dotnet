@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <PackageVersion>0.1.0-preivew</PackageVersion>
     <PackageId>Deislabs.WAGI.Templates</PackageId>
     <Title>Deislabs.WAGI Templates</Title>
     <Authors>Simon Davies</Authors>
