@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="New Rule Set" Description=" " ToolsVersion="15.0">
+    <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+		<Rule Id="SA1615" Action="None" /> <!-- Element return value must be documented -->
+    </Rules>
+	<Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA2007" Action="None" /> <!-- Do not require configureawait https://devblogs.microsoft.com/dotnet/configureawait-faq/ -->
+    <Rule Id="CA2201" Action="None" /> <!--Exception type System.ApplicationException is not sufficiently specific -->
+    <Rule Id="CA1014" Action="None" /> <!--Mark assemblies with CLSCompliant -->
+  </Rules>
+</RuleSet>

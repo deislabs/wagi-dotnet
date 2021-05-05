@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Simon Davies</Authors>
+    <Company>Microsoft</Company>
+    <Description>Provides a configuration driven method to add WASM modules as route endpoints to ASP.Net Core applications using WAGI.WARNING: WAGI is experimental. It is not considered production-grade by its developers, neither is it "supported" software..</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Deislabs.WAGI</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/deislabs/wagi-dotnet</PackageProjectUrl>
+    <PackageReadmeFile>package.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/deislabs/wagi-dotnet/releases</PackageReleaseNotes>
+    <PackageTags>WASM;WAGI;WASI;Wasmtime;WebAssembly;</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RootNamespace>Deislabs.WAGI</RootNamespace>
+    <RepositoryUrl>https://github.com/deislabs/wagi-dotnet.git</RepositoryUrl>
+    <TargetFramework>net5.0</TargetFramework>
+    <Version>0.1.0-preview</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Wasmtime" Version="0.26.0-preview1" />
+    <None Include="docs\package.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

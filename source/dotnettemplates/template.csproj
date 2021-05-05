@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageVersion>0.1.0-preivew</PackageVersion>
+    <PackageId>Deislabs.WAGI.Templates</PackageId>
+    <Title>Deislabs.WAGI Templates</Title>
+    <Authors>Simon Davies</Authors>
+    <Description>Templates to use when creating a WASM/WAGI Applications using Deislabs.WAGI.</Description>
+    <PackageTags>dotnet-new;templates;WASM;WAGI;WASI;WebAssembly;wasmtime;</PackageTags>
+    <TargetFramework>net5.0</TargetFramework>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>NU5105;NU5128;0419,0649</NoWarn>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**;" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>

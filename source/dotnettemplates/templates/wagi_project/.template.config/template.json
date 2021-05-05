@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Simon Davies",
+  "classifications": [ "Web", "ASP.NET", "WASM", "WAGI" ],
+  "identity": "Deislabs.WAGI.Templates.WebApp",
+  "name": "ASP.NET WAGI Web App",
+  "shortName": "wagi",
+  "tags": {
+    "language": "C#",                        
+    "type":"project"
+  },
+  "sourceName": "Wagi.Project"
+}

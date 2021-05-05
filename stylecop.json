@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "namingRules": {
+      "allowedNamespaceComponents": [
+      ]
+    },
+    "orderingRules": {
+      "systemUsingDirectivesFirst": true,
+      "blankLinesBetweenUsingGroups": "allow"
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "allow",
+      "allowConsecutiveUsings": true
+    },
+    "maintainabilityRules": {
+      "topLevelTypes": [
+        "class",
+        "enum",
+        "interface",
+        "struct"
+      ]
+    }
+  }
+}
