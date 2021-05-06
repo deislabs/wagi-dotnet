@@ -29,11 +29,11 @@ jobs:
       shell: bash
     - name: Build
       run: dotnet build --configuration Release
+    - name: Test
+      run: dotnet test 
     - name: Package templates
       run: dotnet pack --configuration Release -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
       working-directory: source/dotnettemplates
-    - name: Test
-      run: dotnet test --no-build 
     - name: Publish Github Packages
       if: ${{ github.event_name == 'push' }}
       run: |
