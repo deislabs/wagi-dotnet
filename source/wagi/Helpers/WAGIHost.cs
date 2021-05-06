@@ -119,8 +119,8 @@ namespace Deislabs.WAGI.Helpers
       // TODO: implement Path Translated
       environmentVariables.Add(("PATH_TRANSLATED", req.Path));
       environmentVariables.Add(("QUERY_STRING", req.QueryString.Value));
-      environmentVariables.Add(("REMOTE_ADDR", this.context.Connection.RemoteIpAddress.ToString()));
-      environmentVariables.Add(("REMOTE_HOST", this.context.Connection.RemoteIpAddress.ToString()));
+      environmentVariables.Add(("REMOTE_ADDR", this.context.Connection.RemoteIpAddress?.ToString()));
+      environmentVariables.Add(("REMOTE_HOST", this.context.Connection.RemoteIpAddress?.ToString()));
 
       // TODO: set Remote User
       environmentVariables.Add(("REMOTE_USER", string.Empty));

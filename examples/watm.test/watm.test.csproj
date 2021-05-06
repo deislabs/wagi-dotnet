@@ -8,9 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-    <PackageReference Include="moq" Version="4.16.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,12 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\wagi\wagi.csproj" />
+    <ProjectReference Include="..\watm\watm.csproj" />
   </ItemGroup>
 
-    <ItemGroup>
-    <Content Include=".\testdata\*.json">
-      <Link>.\testdata\%(Filename).json</Link>
+  <ItemGroup>
+    <Content Include="..\watm\modules\hello.wat">
+      <Link>.\modules\hello.wat</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
