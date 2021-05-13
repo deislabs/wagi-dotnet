@@ -1,13 +1,200 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Simon Davies",
-  "classifications": [ "Web", "ASP.NET", "WASM", "WAGI" ],
+  "classifications": [
+    "Web",
+    "ASP.NET",
+    "WASM",
+    "WAGI"
+  ],
   "identity": "Deislabs.WAGI.Templates.WebApp",
   "name": "ASP.NET WAGI Web App",
   "shortName": "wagi",
+  "description": "Creates a new C# dotnet web app configured with the Deislabs wagi-dotnet extension. This enables the hosting of WAGI http endpoints in ASP.Net Core, if none of the optional parameters are set it will configure a demo endpoint with a simple fibonacci sequnce generator. The optional parameters enable hosting of custom WASM/WAGI modules, once the appplicatio has been created additional modules can be added in the json configuration file",
   "tags": {
-    "language": "C#",                        
-    "type":"project"
+    "language": "C#",
+    "type": "project"
   },
-  "sourceName": "Wagi.Project"
+  "sourceName": "Wagi.Project",
+  "preferNameDirectory": true,
+  "symbols": {
+    "os": {
+      "type": "bind",
+      "binding": "OS"
+    },
+    "path": {
+      "type": "parameter",
+      "defaultValue": "/fibonacci",
+      "replaces": "path_pattern",
+      "description": "This is the path under the server you want to expose your first WASM/WAGI handler at"
+    },
+    "filename": {
+      "type": "parameter",
+      "defaultValue": "fibonacci.wasm",
+      "description": "This is the filename of the wasm module that contains the WASM/WAGI handler, the server expects to find this in the modules directory (fibonacci.wasm is provided in the template), the module can either be a WASM (.wasm) or WAT (.wat) formatted file. If you provide a custom file name it will be copied to the correct location during installation",
+      "replaces":"source_wasm_file"
+    },
+    "entrypoint": {
+      "type": "parameter",
+      "defaultValue": "_start",
+      "replaces": "wasm_entrypoint",
+      "description": "This is entrypoint in the module to expose, if the WAGI handler is not using the default endpoint configure the entrypoint name here."
+    },
+    "environment": {
+      "type": "parameter",
+      "defaultValue": "",
+      "replaces": "wasm_environment",
+      "description": "any environment variables to be set in the WASM/WAGI Modules environment in the form of  '\"KEY1\":\"value1\",\"KEY2\":\"value2\"'."
+    },
+    "volumes": {
+      "type": "parameter",
+      "defaultValue": "",
+      "replaces": "wasm_volumes",
+      "description": "any volumes to be mounted in the WASM/WAGI Modules environment in the form of '\"hostpath1\":\"guestpath1\",\"hostpath2\":\"guestpath2\"'."
+    },
+    "httpmethod": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue":"GET",
+      "choices": [
+        {
+          "choice": "GET",
+          "description": "HTTP GET Request"
+        },
+        {
+          "choice": "POST",
+          "description":"HTTP POST Request"
+        }
+      ],
+      "replaces": "wagi_method",
+      "description": "This is HTTP METHOD used for the module handler"
+    },
+    "filenameOnly": {
+      "type": "generated",
+      "generator": "regex",
+      "replaces": "wasm_filename",
+      "datatype": "string",
+      "parameters": {
+        "source": "filename",
+        "steps": [
+          {
+            "regex": "^(?:[^/]*/)*",
+            "replacement": ""
+          }
+        ]
+      }
+    },
+    "destinationFileName": {
+      "type": "generated",
+      "generator": "join",
+      "replaces": "dest_wasm_file",
+      "parameters": {
+        "symbols": [
+          {
+            "type": "const",
+            "value": "modules"
+          },
+          {
+            "type": "ref",
+            "value": "filenameOnly"
+          }
+        ],
+        "separator": "/"
+      }
+    },
+    "filenameLower": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "filename",
+        "toLower": true
+      }
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "rename": {
+            "gitignore":".gitignore"
+          }
+        },
+        {
+          "condition": "(filenameLower !=  \"fibonacci.wasm\")",
+          "exclude": [
+            "modules/fibonacci.wasm"
+          ]
+        },
+        {
+          "condition": "(filenameLower ==  \"fibonacci.wasm\")",
+          "exclude": [
+            "copy_wasm.cmd",
+            "copy_wasm.sh"
+          ]
+        },
+        {
+          "condition": "(filenameLower !=  \"fibonacci.wasm\" && OS == \"Windows_NT\" )",
+          "include": [
+            "copy_wasm.cmd"
+          ],
+          "exclude": [
+            "copy_wasm.sh"
+          ]
+        },
+        {
+          "condition": "(filenameLower !=  \"fibonacci.wasm\" && OS != \"Windows_NT\" )",
+          "include": [
+            "copy_wasm.sh"
+          ],
+          "exclude": [
+            "copy_wasm.cmd"
+          ]
+        }
+      ]
+    }
+  ],
+  "postActions": [
+    {
+      "condition": "(filenameLower !=  \"fibonacci.wasm\" && OS == \"Windows_NT\")",
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "args": {
+        "executable": "copy_wasm.cmd",
+        "redirectStandardOutput": false
+      },
+      "manualInstructions": [
+        {
+          "text": "Run 'copy_wasm.cmd'"
+        }
+      ],
+      "continueOnError": false,
+      "description ": "Copies the wasm file to the expected module location using copy_wasm.cmd"
+    },
+    {
+      "condition": "(filenameLower !=  \"fibonacci.wasm\" && OS != \"Windows_NT\")",
+      "description": "Make scripts executable",
+      "manualInstructions": [{
+        "text": "Run 'chmod +x copy_wasm.sh'"
+      }],
+      "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+      "args": {
+        "+x": "copy_wasm.sh"
+      },
+      "continueOnError": true
+    },
+    {
+      "condition": "(filenameLower !=  \"fibonacci.wasm\" && OS != \"Windows_NT\")",
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "args": {
+        "executable": "copy_wasm.sh",
+        "redirectStandardOutput": false
+      },
+      "manualInstructions": [
+        {
+          "text": "Run 'copy_wasm.sh'"
+        }
+      ],
+      "continueOnError": false,
+      "description ":  "Copies the wasm file to the expected module location using copy_wasm.sh"
+    }
+  ]
 }

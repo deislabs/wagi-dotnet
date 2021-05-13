@@ -56,8 +56,8 @@ Configuration for the extension is defined in a configuration section which is n
 
 - Fields
   - `ModulePath`: The path to the directory on disk where the WASM modules are located.
-  - `Modules` : Modules is a object where the key is path pattern used to create a route to the module and the values is a Module object. The path pattern is applied to each address that the server is listening on (e.g. by default `/foo` becomes  `http://localhost:5000/foo` and `https://localhost:5001/foo`)
-  - Module Fields
+  - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the value is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
+  - Module Object Fields
     - `filename` (REQUIRED): The path relative to `ModulePath` of the module on the file system, the file should be named either `<name>.wat` for modules in Web Assembly Text format or `<name>.wasm` for binary modules.
     - `environment`: Key value pairs of strings where the key is an environment variable name and the value is an environment variable value. Each entry respresents an Environment Variables created in the modules environment at runtime.
     - `entrypoint` (default: `_start`): The name of the function within the module. This will directly execute that function. Most WASM/WASI implementations create a `_start` function by default. An example of a module that declares 3 entrypoints can be found [here](https://github.com/technosophos/hello-wagi).

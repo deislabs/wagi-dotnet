@@ -22,11 +22,13 @@ You can use any programming language that can compile to `WASM32-WASI`.
 
 ## Quickstart
 
-Here's the fastest way to try out WAGI-dotnet. For details, checkout out the [documentation](docs/README.md).
+To make it easy to get started with WAGI-dotnet two nuget packages are provided, the first (Deislabs.WAGI.Templates) contains templates that can be used with the dotnet cli tool. The second pcakage contains runtime extension that enable hosting of WAGI modules in ASP.Net using only configuration.  For full details, checkout out the [documentation](docs/README.md).
 
 WAGI-dotnet requires [.Net 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
 
-To create a ASP.Net Core web application that hosts WAGI Modules:
+To create a ASP.Net Core web application that host a demo WAGI Module:
+
+***Note: nuget.org only contains (pre-)released versions of the packages, to install the latest versions follow the instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry) to set up GitHub packages registry as a source for nuget packages.***
 
 ``` Console
 dotnet add -i Deislabs.WAGI.Templates
@@ -69,6 +71,8 @@ fib(93)=12200160415121876738
 ```
 
 To add your own modules, compile your code to `wasm32-wasi` format and add them to the ASP.Net Configuration (the easiest way to do this is to add entries to appsettings.Development.json).
+
+You can easily create an application that contains your own module by roviding additional options to the ```dotnet new wagi``` command, run ```dotnet new wagi --help``` to see details, alternatively you can edit the application.Development.settings.json configuration file , see [the docs](./docs/coonfigurain_and_running.md) for more details.
 
 ### Examples and Demos
 

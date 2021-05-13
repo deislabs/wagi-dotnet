@@ -36,6 +36,14 @@ info : Writing assets file to disk. Path: /tmp/wagiproj/obj/project.assets.json
 log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
 ```
 
+## Install the WAGI extension package from Github packages
+
+Only released versions of the WAGI extension are availble from nuget.org, more recent builds are available in Github Packages, to install a nuget package from Github:
+
+```console
+dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/simongdavies/index.json
+```
+
 ## Add Wagi endpoint configuration
 
 Modify `Startup.cs` to configure endpoints for WAGI modules.

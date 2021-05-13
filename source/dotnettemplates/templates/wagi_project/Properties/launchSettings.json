@@ -7,8 +7,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "WASMTIME_BACKTRACE_DETAILS":1
-      },
-      "applicationUrl": "http://localhost:8888"
+      }
     }
   }
 }
