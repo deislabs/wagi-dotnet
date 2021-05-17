@@ -33,13 +33,13 @@ To create a ASP.Net Core web application that host a demo WAGI Module:
 ***Note: nuget.org only contains (pre-)released versions of the packages, to install the latest versions follow the instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry) to set up GitHub packages registry as a source for nuget packages.***
 
 ``` Console
-dotnet add -i Deislabs.WAGI.Templates
+dotnet new -i Deislabs.WAGI.Templates::0.1.0-preview
 ```
 
 This will add the dotnet wagi templates.
 
 ``` Console
-dotnet new wagi -n Wagi
+dotnet new wagi -n hello-wagi
 ```
 
 This creates a new ASP.Net Core Web application that hosts an example fibonacci WAGI module.
