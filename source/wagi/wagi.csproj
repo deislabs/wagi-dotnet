@@ -8,7 +8,7 @@
     <PackageId>Deislabs.WAGI</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/deislabs/wagi-dotnet</PackageProjectUrl>
-    <PackageReadmeFile>package.md</PackageReadmeFile>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/deislabs/wagi-dotnet/releases</PackageReleaseNotes>
     <PackageTags>WASM;WAGI;WASI;Wasmtime;WebAssembly;</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Wasmtime" Version="0.26.0-preview1" />
-    <None Include="docs\package.md" Pack="true" PackagePath="\" />
+    <None Include="docs/readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
