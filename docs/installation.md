@@ -41,7 +41,7 @@ log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
 Only released versions of the WAGI extension are availble from nuget.org, more recent builds are available in Github Packages, to install a nuget package from Github:
 
 ```console
-dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/simongdavies/index.json
+dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/deislabs/index.json
 ```
 
 ## Add Wagi endpoint configuration
