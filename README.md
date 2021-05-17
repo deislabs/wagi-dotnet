@@ -10,6 +10,8 @@ It is not considered production-grade by its developers, neither is it "supporte
 > This is one of a multitude of projects (including [Krustlet](https://github.com/deislabs/krustlet))
 > designed to test the limits of WebAssembly as a cloud-based runtime.
 
+[![Build Status](https://github.com/Deislabs/wagi-dotnet/workflows/dotnet.yml/badge.svg)](https://github.com/Deislabs/wagi-dotnet/actions)
+
 ## tl;dr
 
 WAGI allows you to run WebAssembly WASI binaries as HTTP handlers.
