@@ -36,7 +36,7 @@ To create a ASP.Net Core web application that host a demo WAGI Module:
 dotnet new -i Deislabs.WAGI.Templates::0.1.0-preview
 ```
 
-This will add the dotnet wagi templates.
+This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.1.0-preview`.
 
 ``` Console
 dotnet new wagi -n hello-wagi
@@ -45,20 +45,21 @@ dotnet new wagi -n hello-wagi
 This creates a new ASP.Net Core Web application that hosts an example fibonacci WAGI module.
 
 ``` Console
+cd hello-wagi
 dotnet run
 ```
 
-This starts a ASP.Net Core Web application WAGI host on port 8888.
+This starts a ASP.Net Core Web application WAGI host on port 5000 (http) and 5001 (https).
 
 Use a browser or a tool like `curl` to test:
 
 ``` Console
-$ curl -v http://localhost:8888/fibonacci?93
+$ curl -v http://localhost:5000/fibonacci?93
 *   Trying 127.0.0.1...
 * TCP_NODELAY set
-* Connected to localhost (127.0.0.1) port 8888 (#0)
+* Connected to localhost (127.0.0.1) port 5000 (#0)
 > GET /fibonacci?93 HTTP/1.1
-> Host: localhost:8888
+> Host: localhost:5000
 > User-Agent: curl/7.58.0
 > Accept: */*
 >
@@ -75,6 +76,18 @@ fib(93)=12200160415121876738
 To add your own modules, compile your code to `wasm32-wasi` format and add them to the ASP.Net Configuration (the easiest way to do this is to add entries to appsettings.Development.json).
 
 You can easily create an application that contains your own module by roviding additional options to the ```dotnet new wagi``` command, run ```dotnet new wagi --help``` to see details, alternatively you can edit the application.Development.settings.json configuration file , see [the docs](./docs/coonfigurain_and_running.md) for more details.
+
+### Building and running the application
+
+To build and run the application
+
+``` console
+
+dotnet build -c Release
+export ASPNETCORE_ENVIRONMENT="Development"
+./bin/Release/net5.0/hello-wagi
+
+```
 
 ### Examples and Demos
 
