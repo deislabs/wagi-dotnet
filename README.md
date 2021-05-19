@@ -84,7 +84,6 @@ To build and run the application
 ``` console
 
 dotnet build -c Release
-export ASPNETCORE_ENVIRONMENT="Development"
 ./bin/Release/net5.0/hello-wagi
 
 ```
