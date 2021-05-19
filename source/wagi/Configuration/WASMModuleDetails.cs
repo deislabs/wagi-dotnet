@@ -2,6 +2,7 @@
 namespace Deislabs.WAGI.Configuration
 {
   using System.Collections.Generic;
+  using System.Collections.ObjectModel;
 
   /// <summary>
   /// This class contains configuration for properties for an exposed WASM function.
@@ -32,6 +33,21 @@ namespace Deislabs.WAGI.Configuration
     /// Gets or Sets the allowed HTTP Method for this function.
     /// </summary>
     public string HttpMethod { get; set; }
+
+    /// <summary>
+    ///  Gets or sets a value indicating whether this endpoint requires an authenitcated user.
+    /// </summary>
+    public bool Authorize { get; set; }
+
+    /// <summary>
+    ///  Gets or sets an array of Roles that the user must be a member of to access this endpoint.
+    /// </summary>
+    public Collection<string> Roles { get; set; }
+
+    /// <summary>
+    ///  Gets or sets an array of Polcies that the user must satisfy to access this endpoint.
+    /// </summary>
+    public Collection<string> Policies { get; set; }
   }
 }
 #pragma warning restore CA2227

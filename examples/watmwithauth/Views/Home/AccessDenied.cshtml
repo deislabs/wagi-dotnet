@@ -1,0 +1,14 @@
+@{
+  ViewData["Title"] = "Access Denied Page";
+}
+
+<div class="text-center">
+  @if (User.Identity.IsAuthenticated)
+  {
+    <span>Access Denied. User <b>@User.Identity.Name</b> does not have access to <b> @ViewData["ReturnUrl"]</b> </span>
+  }
+  else
+  {
+    <span>Access To <b> @ViewData["ReturnUrl"]</b> Denied. </span>
+  }
+</div>

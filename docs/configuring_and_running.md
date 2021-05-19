@@ -63,6 +63,9 @@ Configuration for the extension is defined in a configuration section which is n
     - `entrypoint` (default: `_start`): The name of the function within the module. This will directly execute that function. Most WASM/WASI implementations create a `_start` function by default. An example of a module that declares 3 entrypoints can be found [here](https://github.com/technosophos/hello-wagi).
     - `volumes`: Key value pairs of strings where the key is an path in the WASM module and the value is a path in the host environment. Each entry respresents a host directory that is made available to the module at runtime.
     - `httpmethod` (default: `GET`): the HTTP method for requests to be mapped. Can be either GET or POST.
+    - `authorize` (default: `false`): specifies that the module should only be accessible to authenticated users.
+    - `roles` : An array of roles that the user must belong to in order to access the module.
+    - `policies` : An array of policies that the user must satisfy to in order to access the module.
 
 Here is a brief example of a configuration file that declares two routes:
 
@@ -182,6 +185,60 @@ invoking a different function:
     }
   }
 ```
+
+### Authorization
+
+By adding additional properties to a modules configuration runtime access can be controlled using ASP.Net Core [Authentication] (<https://docs.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-5.0>) and [Authorization](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-5.0) capabailities. Any registered authentication scheme can be used, the configuration only specifies the conditions that should be met to allow access not how those conditions are fulfilled.
+
+The simplest example is to require that a user is authenticated to access the module, the following example shows how to configure a module to require that all users that access it be authnticated.
+
+```json
+"WASM": {
+    "ModulePath": "modules",
+    "Modules": {
+      "/hellowatauth": {
+        "FileName": "hello.wat",
+        "Authorize" : true
+      }
+    }
+}
+```
+
+With this configuration access to the module will only be granted to logged in users.
+
+It is also possible to require that the logged in user is a member of one or more roles, for example:
+
+```json
+"WASM": {
+    "ModulePath": "modules",
+    "Modules": {
+      "/hellowatrole": {
+        "FileName": "hello.wat",
+        "Roles" : ["admin"]
+      },
+    }
+}
+```
+
+With this configuration the logged in user must be assigned the ```admin``` role.
+
+It is also possible to require that the logged in user satisfies one or more [policies](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-5.0) in order to access the module:
+
+```json
+"WASM": {
+    "ModulePath": "modules",
+    "Modules": {
+      "/hellowatpolicy": {
+        "FileName": "hello.wat",
+        "Policies" : ["IsASuperAdmin"]
+      },
+    }
+}
+```
+
+In this example the the logged in user must be satisfy the ```IsASuperAdmin``` policiy.
+
+To enforce authorization on modules requires that ASP.Net is configured correctly, a simple example showing how to do this can be found [here](../examples/watmwithauth).
 
 ## What's Next?
 

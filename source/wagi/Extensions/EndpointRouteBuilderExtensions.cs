@@ -3,7 +3,9 @@
   using System;
   using System.Collections.Generic;
   using System.IO;
+  using System.Linq;
   using Deislabs.WAGI.Configuration;
+  using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Builder;
   using Microsoft.AspNetCore.Routing;
   using Microsoft.Extensions.Configuration;
@@ -84,6 +86,27 @@
             {
               await context.RunWAGIRequest(moduleFileAndPath, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes);
             });
+
+            if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
+            {
+              if (moduleDetails.Policies?.Count > 0)
+              {
+                endpointConventionBuilder.RequireAuthorization(moduleDetails.Policies.ToArray<string>());
+              }
+
+              if (moduleDetails.Roles?.Count > 0)
+              {
+                var authData = new AuthorizeAttribute
+                {
+                  Roles = string.Join(',', moduleDetails.Roles.ToArray<string>()),
+                };
+                endpointConventionBuilder.RequireAuthorization(authData);
+              }
+            }
+            else if (moduleDetails.Authorize)
+            {
+              endpointConventionBuilder.RequireAuthorization();
+            }
 
             endpointConventionBuilders.Add(endpointConventionBuilder);
           }
