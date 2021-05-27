@@ -4,6 +4,7 @@
   using System.Collections.Generic;
   using System.IO;
   using System.Linq;
+  using System.Net.Http;
   using Deislabs.WAGI.Configuration;
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Builder;
@@ -28,7 +29,8 @@
       string section = "WASM")
     {
       var loggerFactory = endpoints?.ServiceProvider.GetService<ILoggerFactory>();
-      var logger = loggerFactory.CreateLogger(typeof(EndpointRouteBuilderExtensions).Namespace);
+      var httpClientFactory = endpoints?.ServiceProvider.GetService<IHttpClientFactory>();
+      var logger = loggerFactory.CreateLogger(typeof(EndpointRouteBuilderExtensions).FullName);
       var endpointConventionBuilders = new List<IEndpointConventionBuilder>();
       var configuration = endpoints.ServiceProvider.GetService<IConfiguration>();
       var modules = new WASMModules();
@@ -81,10 +83,26 @@
             }
 
             var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod, route);
+            var allowedHosts = new List<Uri>();
+            if (moduleDetails.AllowedHosts?.Count > 0)
+            {
+              foreach (var allowedHost in moduleDetails.AllowedHosts)
+              {
+                if (Uri.TryCreate(allowedHost, UriKind.Absolute, out var uri))
+                {
+                  allowedHosts.Add(uri);
+                }
+                else
+                {
+                  logger.LogError($"failed to create Uri for allowed host {allowedHost}  for route {route} -skipping");
+                }
+              }
+            }
+
             logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
             var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
             {
-              await context.RunWAGIRequest(moduleFileAndPath, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes);
+              await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts);
             });
 
             if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)

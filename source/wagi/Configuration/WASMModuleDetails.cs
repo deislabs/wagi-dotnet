@@ -48,6 +48,11 @@ namespace Deislabs.WAGI.Configuration
     ///  Gets or sets an array of Polcies that the user must satisfy to access this endpoint.
     /// </summary>
     public Collection<string> Policies { get; set; }
+
+    /// <summary>
+    ///  Gets or sets an array of AllowedHosts that this module can comunicate with over HTTP.
+    /// </summary>
+    public Collection<string> AllowedHosts { get; set; }
   }
 }
 #pragma warning restore CA2227

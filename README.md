@@ -108,7 +108,7 @@ See the "Differences" section below for the differences.
 We hang out in the [#krustlet](https://kubernetes.slack.com/messages/krustlet) channel of the [Kubernetes Slack](https://kubernetes.slack.com).
 If WAGI gains popularity, we'll create a dedicated channel (probably on a more fitting Slack server).
 
-WAGI is experimental, and we welcome contributions to improve the project.
+WAGI and WAGI-dotnet are experimental, and we welcome contributions to improve the project.
 In fact, we're delighted that you're even reading this section of the docs!
 
 For bug fixes:

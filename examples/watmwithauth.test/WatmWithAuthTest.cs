@@ -41,10 +41,10 @@ namespace watmwithauth.test
       var client = factory.CreateClient();
 
       var tests = new (string path, string user)[] { ("/hellowatauth", "admin"), ("/hellowatrole", "superadmin"), ("/hellowatpolicy", "specialadmin") };
-      foreach (var test in tests)
+      foreach (var (path, user) in tests)
       {
-        var content = new StringContent($"username={test.user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
-        var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={test.path}", content);
+        var content = new StringContent($"username={user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
+        var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={path}", content);
         var result = await response.Content.ReadAsStringAsync();
         Assert.Equal("Hello World!", result.TrimEnd());
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -58,12 +58,12 @@ namespace watmwithauth.test
       var client = factory.CreateClient();
 
       var tests = new (string path, string user)[] { ("/hellowatrole", "admin"), ("/hellowatpolicy", "admin") };
-      foreach (var test in tests)
+      foreach (var (path, user) in tests)
       {
-        var content = new StringContent($"username={test.user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
-        var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={test.path}", content);
+        var content = new StringContent($"username={user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
+        var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={path}", content);
         var result = await response.Content.ReadAsStringAsync();
-        Assert.Contains($"Access Denied. User <b>{test.user}</b> does not have access to <b> {test.path}</b>", result);
+        Assert.Contains($"Access Denied. User <b>{user}</b> does not have access to <b> {path}</b>", result);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
       }
     }
