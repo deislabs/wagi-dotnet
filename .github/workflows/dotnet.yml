@@ -43,12 +43,8 @@ jobs:
             dotnet nuget push $nupkg --api-key ${{ secrets.GHPACKAGES_PAT }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate
            done
       shell: bash
-
-  release:
-    if: startsWith( github.ref, 'refs/tags/' )
-    runs-on: ubuntu-latest
-    steps:
     - name: Publish Nuget Packages
+      if: startsWith( github.ref, 'refs/tags/' )
       run: |
            for nupkg in $(find . -name *.nupkg)
            do
@@ -57,12 +53,14 @@ jobs:
            done
       shell: bash
     - name: Build Changelog
+      if: startsWith( github.ref, 'refs/tags/' )
       id: github_release
       uses: mikepenz/release-changelog-builder-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create Release
+      if: startsWith( github.ref, 'refs/tags/' )    
       uses: actions/create-release@v1
       with:
         tag_name: ${{ github.ref }}
