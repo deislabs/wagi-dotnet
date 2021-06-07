@@ -8,7 +8,7 @@
     <PackageId>Deislabs.WAGI</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/deislabs/wagi-dotnet</PackageProjectUrl>
-    <!-- <PackageReadmeFile>readme.md</PackageReadmeFile> -->
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/deislabs/wagi-dotnet/releases</PackageReleaseNotes>
     <PackageTags>WASM;WAGI;WASI;Wasmtime;WebAssembly;</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -17,7 +17,8 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <TargetFramework>net5.0</TargetFramework>
-    <IncludeSymbols>true</IncludeSymbols>
+    <!-- See https://github.com/NuGet/Home/issues/10791 -->
+    <!-- <IncludeSymbols>true</IncludeSymbols> -->
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
