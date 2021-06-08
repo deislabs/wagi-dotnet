@@ -51,6 +51,11 @@ jobs:
       shell: bash
     - name: Build
       run: dotnet build -c ${{ matrix.config }}
+    - name: Set Test Environment variables
+      run: |
+           export TEST_STORAGE_ACCOUNT_NAME=${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+           export TEST_STORAGE_ACCOUNT_KEY=${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
+      shell: bash
     - name: Test
       run: dotnet test -c ${{ matrix.config }}
     - name: Package templates

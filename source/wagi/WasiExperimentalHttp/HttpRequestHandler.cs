@@ -13,6 +13,9 @@
   using Wasi.Experimental.Http.Exceptions;
   using Wasmtime;
 
+  /// <summary>
+  /// HttpRequestHandler provides support for wasi_experimental_http.
+  /// </summary>
   internal class HttpRequestHandler : IDisposable
   {
     private const string ModuleName = "wasi_experimental_http";
@@ -29,6 +32,13 @@
 
     private int lastResponse;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpRequestHandler"/> class.
+    /// </summary>
+    /// <param name="host">The WASMTime host.</param>
+    /// <param name="loggerFactory">ILoggerFactory.</param>
+    /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
+    /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
     public HttpRequestHandler(Host host, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, List<Uri> allowedHosts = null)
     {
       this.logger = loggerFactory.CreateLogger(typeof(HttpRequestHandler).FullName);
@@ -42,6 +52,28 @@
       host.DefineFunction<Caller, int, int, int, int, int>(ModuleName, "headers_get_all", this.GetAllHeaders);
     }
 
+#pragma warning disable CS1591
+#pragma warning disable SA1600
+    public void Dispose()
+    {
+      this.Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        this.httpClient?.Dispose();
+        foreach (var response in this.responses)
+        {
+          response.Value.Dispose();
+        }
+      }
+    }
+
+#pragma warning restore CS1591
+#pragma warning restore SA1600
     private static CallerMemory GetMemory(Caller caller)
     {
       var memory = caller.GetMemory(MemoryName);
@@ -351,9 +383,9 @@
       var line = string.Empty;
       while ((line = stringReader.ReadLine()) != null)
       {
-        var index = line.IndexOf(':');
+        var index = line.IndexOf(':', StringComparison.InvariantCultureIgnoreCase);
         var name = line.Substring(0, index);
-        var value = line.Substring(++index);
+        var value = line[++index..];
         this.logger.LogTrace($"Adding Header {name}");
         headers.Add(name, value);
       }
@@ -422,24 +454,6 @@
       }
 
       return httpResponseMessage;
-    }
-
-    public void Dispose()
-    {
-      this.Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        this.httpClient?.Dispose();
-        foreach (var response in this.responses)
-        {
-          response.Value.Dispose();
-        }
-      }
     }
   }
 }

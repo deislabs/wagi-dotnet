@@ -85,14 +85,26 @@
       host.DefineWasi("wasi_snapshot_preview1", config);
       using var httpRequestHandler = this.GetHttpRequestHandler(host);
       {
-        using dynamic instance = host.Instantiate(module);
-        var callSiteBinder = Binder.InvokeMember(CSharpBinderFlags.None, this.entryPoint, Enumerable.Empty<Type>(), instance.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
-        var callSite = CallSite<Action<CallSite, object>>.Create(callSiteBinder);
-        var stopWatch = Stopwatch.StartNew();
-        callSite.Target(callSite, instance);
-        stopWatch.Stop();
-        var elapsed = stopWatch.Elapsed;
-        this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
+        try
+        {
+          using dynamic instance = host.Instantiate(module);
+          var callSiteBinder = Binder.InvokeMember(CSharpBinderFlags.None, this.entryPoint, Enumerable.Empty<Type>(), instance.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
+          var callSite = CallSite<Action<CallSite, object>>.Create(callSiteBinder);
+          var stopWatch = Stopwatch.StartNew();
+          callSite.Target(callSite, instance);
+          stopWatch.Stop();
+          var elapsed = stopWatch.Elapsed;
+          this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
+        }
+        catch (WasmtimeException ex)
+        {
+          if (ex.Message == "unknown import: `wasi_experimental_http::close` has not been defined")
+          {
+            throw new ApplicationException("Allowed Hosts must be configured for modules making HTTP requests", ex);
+          }
+
+          throw;
+        }
       }
 
       using var stderrStream = new FileStream(stderr.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

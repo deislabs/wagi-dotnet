@@ -1,4 +1,5 @@
-﻿namespace Wasi.Experimental.Http
+﻿#pragma warning disable SA1600
+namespace Wasi.Experimental.Http
 {
   using System;
   using System.IO;
@@ -46,4 +47,5 @@
       }
     }
   }
+#pragma warning restore SA1600
 }
