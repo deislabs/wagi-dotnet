@@ -3,19 +3,27 @@
     {
       "title": "## 🚀 Features",
       "labels": [
-        "feature"
+        "feature",
+        "enhancement"
       ]
     },
     {
       "title": "## 🐛 Fixes",
       "labels": [
-        "fix"
+        "fix", 
+        "bug"
       ]
     },
     {
       "title": "## 🧪 Tests",
       "labels": [
         "test"
+      ]
+    },
+    {
+      "title": "## 📦 Dependencies",
+      "labels": [
+        "dependencies"
       ]
     }
   ]

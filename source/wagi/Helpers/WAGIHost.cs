@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Helpers
+﻿namespace Deislabs.WAGI.Helpers
 {
   using System;
   using System.Collections.Generic;
@@ -85,7 +85,8 @@ namespace Deislabs.WAGI.Helpers
       var elapsed = stopWatch.Elapsed;
       this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Args {string.Join(",", args)} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
 
-      using var errreader = new StreamReader(stderr.Path);
+      using var stderrStream = new FileStream(stderr.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+      using var errreader = new StreamReader(stderrStream);
       string line;
       while ((line = await errreader.ReadLineAsync()) != null)
       {
@@ -175,7 +176,8 @@ namespace Deislabs.WAGI.Helpers
       var statusCode = 200;
       var contentType = string.Empty;
       var reason = string.Empty;
-      using var reader = new StreamReader(outputPath);
+      using var stdoutStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+      using var reader = new StreamReader(stdoutStream);
       string line;
       while ((line = await reader.ReadLineAsync()) != null)
       {
