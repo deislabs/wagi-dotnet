@@ -53,6 +53,11 @@ namespace Deislabs.WAGI.Configuration
     ///  Gets or sets an array of AllowedHosts that this module can comunicate with over HTTP.
     /// </summary>
     public Collection<string> AllowedHosts { get; set; }
+
+    /// <summary>
+    ///  Gets or sets the maximum umber of HTTP requests that this module can make.
+    /// </summary>
+    public int MaxHttpRequests { get; set; }
   }
 }
 #pragma warning restore CA2227

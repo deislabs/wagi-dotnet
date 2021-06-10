@@ -42,6 +42,8 @@
     private readonly string moduleType;
     private readonly List<Uri> allowedHosts;
 
+    private readonly int maxHttpRequests;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="WAGIHost"/> class.
     /// </summary>
@@ -53,7 +55,8 @@
     /// <param name="volumes">The volumes to be added to the WasiConfiguration as preopened directories.</param>
     /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
     /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
-    public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, string moduleType, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts)
+    /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
+    public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, string moduleType, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
     {
       this.context = context;
       this.httpClientFactory = httpClientFactory;
@@ -66,6 +69,7 @@
       this.moduleType = moduleType;
       this.environment = environment ?? new Dictionary<string, string>();
       this.allowedHosts = allowedHosts;
+      this.maxHttpRequests = maxHttpRequests;
     }
 
     /// <summary>
@@ -138,7 +142,7 @@
       HttpRequestHandler httpRequestHandler = null;
       if (this.allowedHosts.Count > 0)
       {
-        httpRequestHandler = new HttpRequestHandler(host, this.loggerFactory, this.httpClientFactory, this.allowedHosts);
+        httpRequestHandler = new HttpRequestHandler(host, this.loggerFactory, this.httpClientFactory, this.maxHttpRequests, this.allowedHosts);
       }
 
       return httpRequestHandler;

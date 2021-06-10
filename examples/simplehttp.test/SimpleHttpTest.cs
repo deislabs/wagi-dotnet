@@ -107,11 +107,11 @@ namespace SimpleHttp.Test
       var response = await client.PostAsync($"/writeblob?container={this.fixture.ContainerName}&blob={this.fixture.BlobName}", content);
       var result = await response.Content.ReadAsStringAsync();
       Assert.True(response.IsSuccessStatusCode);
-      Assert.Equal($"Writing {this.fixture.TestPostData.Length} bytes.\n", result);
+      Assert.Equal($"Writing {this.fixture.TestPostData.Length} bytes.", result.TrimEnd());
       response = await client.GetAsync($"/readblob?container={this.fixture.ContainerName}&blob={this.fixture.BlobName}");
       result = await response.Content.ReadAsStringAsync();
       Assert.True(response.IsSuccessStatusCode);
-      Assert.Equal($"{this.fixture.TestPostData}\n", result);
+      Assert.Equal(this.fixture.TestPostData, result.TrimEnd());
     }
   }
 }

@@ -14,6 +14,11 @@ namespace Deislabs.WAGI.Configuration
     public string ModulePath { get; set; }
 
     /// <summary>
+    ///  Gets or sets the maximum number of HTTP requests that modules can make - can be overridden per module by setting on WASMModuleDetails.
+    /// </summary>
+    public int MaxHttpRequests { get; set; }
+
+    /// <summary>
     /// Gets or sets details of modules that can be executed via the command line or HTTP Requests.
     /// </summary>
     public Dictionary<string, WASMModuleDetails> Modules { get; set; }

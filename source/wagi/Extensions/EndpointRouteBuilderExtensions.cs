@@ -12,6 +12,7 @@
   using Microsoft.Extensions.Configuration;
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.Extensions.Logging;
+  using Wasi.Experimental.Http;
 
   /// <summary>
   /// Provides extension methods for <see cref="IEndpointRouteBuilder"/> to add routes.
@@ -45,6 +46,12 @@
         if (!Directory.Exists(modules.ModulePath))
         {
           throw new ApplicationException($"Module Path not found {modules.ModulePath}");
+        }
+
+        var defaultHttpRequestLimit = HttpRequestHandler.DefaultHttpRequestLimit;
+        if (modules.MaxHttpRequests > 0 && modules.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
+        {
+          defaultHttpRequestLimit = modules.MaxHttpRequests;
         }
 
         if (modules.Modules == null || modules.Modules.Count == 0)
@@ -99,10 +106,16 @@
               }
             }
 
+            var maxHttpRequests = defaultHttpRequestLimit;
+            if (moduleDetails.MaxHttpRequests > 0 && moduleDetails.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
+            {
+              maxHttpRequests = moduleDetails.MaxHttpRequests;
+            }
+
             logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
             var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
             {
-              await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts);
+              await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
             });
 
             if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)

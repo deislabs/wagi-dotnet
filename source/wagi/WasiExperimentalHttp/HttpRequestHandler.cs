@@ -18,9 +18,17 @@
   /// </summary>
   internal class HttpRequestHandler : IDisposable
   {
+    /// <summary>
+    /// DefaultHttpRequestLimit specifies the default HTTP Request Limit for a module.
+    /// </summary>
+    public const int DefaultHttpRequestLimit = 10;
+
+    /// <summary>
+    /// MaxHttpRequestLimit specifies the maximum HTTP Request Limit for a module.
+    /// </summary>
+    public const int MaxHttpRequestLimit = 500;
     private const string ModuleName = "wasi_experimental_http";
     private const string MemoryName = "memory";
-    private const int MaxResponses = 10;
     private const int OK = 0;
     private const int RuntimeError = 12;
 
@@ -29,6 +37,7 @@
     private readonly ILogger logger;
     private readonly HttpClient httpClient;
     private readonly List<Uri> allowedHosts;
+    private readonly int maxHttpRequests;
 
     private int lastResponse;
 
@@ -39,11 +48,13 @@
     /// <param name="loggerFactory">ILoggerFactory.</param>
     /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
     /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
-    public HttpRequestHandler(Host host, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, List<Uri> allowedHosts = null)
+    /// <param name="maxHttpRequests">The maximum number of requests that can be made by a module.</param>
+    public HttpRequestHandler(Host host, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, int maxHttpRequests, List<Uri> allowedHosts = null)
     {
       this.logger = loggerFactory.CreateLogger(typeof(HttpRequestHandler).FullName);
       this.httpClient = httpClientFactory.CreateClient();
       this.allowedHosts = allowedHosts;
+      this.maxHttpRequests = maxHttpRequests;
       this.responses = new Dictionary<int, Response>();
       host.DefineFunction<Caller, int, int, int, int, int>(ModuleName, "body_read", this.ReadBody);
       host.DefineFunction<Caller, int, int>(ModuleName, "close", this.Close);
@@ -160,7 +171,7 @@
         var httpResponseMessage = this.SendHttpRequest(url, method, headers, body);
         memory.WriteInt32(statusCodePtr, (int)httpResponseMessage.StatusCode);
         var handle = Interlocked.Increment(ref this.lastResponse);
-        if (handle > MaxResponses)
+        if (handle > this.maxHttpRequests)
         {
           throw new TooManySessionsException();
         }
