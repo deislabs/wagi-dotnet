@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net.Http;
 using Xunit;
 using Fibonacci;
@@ -21,7 +21,7 @@ namespace Fibonacci.Test
 
       var response = await client.GetAsync("/fibonacci?23");
       var result = await response.Content.ReadAsStringAsync();
-      Assert.Equal("fib(23)=28657\n", result);
+      Assert.Equal("fib(23)=28657", result.TrimEnd());
       Assert.True(response.IsSuccessStatusCode);
 
     }

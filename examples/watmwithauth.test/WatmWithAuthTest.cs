@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -46,7 +46,7 @@ namespace watmwithauth.test
         var content = new StringContent($"username={test.user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
         var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={test.path}", content);
         var result = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello World!\n", result);
+        Assert.Equal("Hello World!", result.TrimEnd());
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
       }
     }

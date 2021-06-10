@@ -1,4 +1,4 @@
-using Xunit;
+﻿using Xunit;
 using Watm;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -19,7 +19,7 @@ namespace Watm.Test
 
       var response = await client.GetAsync("/hellowat");
       var result = await response.Content.ReadAsStringAsync();
-      Assert.Equal("Hello World!\n", result);
+      Assert.Equal("Hello World!", result.TrimEnd());
       Assert.True(response.IsSuccessStatusCode);
 
     }
