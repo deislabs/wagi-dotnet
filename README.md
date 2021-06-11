@@ -92,6 +92,8 @@ dotnet build -c Release
 
 - [fibonacci](examples/fibonacci/README.md): A simple fibonacci example written in assembly script ([source](https://github.com/simongdavies/fibonacci-wagi-as))
 - [watm](examples/watm/README.md): Hello World ! written in [Web Assembly Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format)
+- [watmwithauth](examples/watmwithauth/README.md): watm Hello world example showing how to use Authorisation, Roles and Policy.
+- [simplehttp](examples/simplehttp/README.md): Shows how to use [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) to make HTTP Requests from modules, there is an example written in AssemblyScript which calls https://postman-echo.com/ ([Source](https://github.com/simongdavies/http-wagi-as)) and an example written in Rust which uses an experimental version of the [Azure SDK for Rust](https://github.com/radu-matei/azure-sdk-for-rust/tree/enable-wasi-experimental-http) to read and write a blob to Azure Storage ([Source](https://github.com/simongdavies/http-azure-rust)).
 
 ### Other examples
 
@@ -101,14 +103,14 @@ dotnet build -c Release
 
 If you want to understand the details, read the [Common Gateway Interface 1.1](https://tools.ietf.org/html/rfc3875) specification.
 While this is not an exact implementation, it is very close.
-See the "Differences" section below for the differences.
+See the "Differences" section [here](https://github.com/deislabs/wagi/blob/main/docs/architecture.md#differences-from-cgi-11).
 
 ## Contributing
 
 We hang out in the [#krustlet](https://kubernetes.slack.com/messages/krustlet) channel of the [Kubernetes Slack](https://kubernetes.slack.com).
 If WAGI gains popularity, we'll create a dedicated channel (probably on a more fitting Slack server).
 
-WAGI is experimental, and we welcome contributions to improve the project.
+WAGI and WAGI-dotnet are experimental, and we welcome contributions to improve the project.
 In fact, we're delighted that you're even reading this section of the docs!
 
 For bug fixes:

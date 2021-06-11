@@ -52,6 +52,9 @@ jobs:
     - name: Build
       run: dotnet build -c ${{ matrix.config }}
     - name: Test
+      env:
+        TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+        TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
       run: dotnet test -c ${{ matrix.config }}
     - name: Package templates
       run: dotnet pack -c ${{ matrix.config }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 

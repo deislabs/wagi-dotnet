@@ -9,9 +9,9 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/examples/fibonacci/bin/Debug/net5.0/fibonacci.dll",
+      "program": "${workspaceFolder}/examples/simplehttp/bin/Debug/net5.0/simplehttp.dll",
       "args": [ ],
-      "cwd": "${workspaceFolder}/examples/fibonacci",
+      "cwd": "${workspaceFolder}/examples/simplehttp",
       "console": "internalConsole",
       "env":{
         "WASMTIME_BACKTRACE_DETAILS":"1",

@@ -6,6 +6,7 @@
   using System.Globalization;
   using System.IO;
   using System.Linq;
+  using System.Net.Http;
   using System.Runtime.CompilerServices;
   using System.Text;
   using System.Threading.Tasks;
@@ -17,8 +18,10 @@
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.Extensions.Logging;
   using Microsoft.Extensions.Primitives;
+  using Wasi.Experimental.Http;
   using Wasmtime;
   using Wasmtime.Exports;
+
   using static System.Net.WebUtility;
 
   /// <summary>
@@ -30,28 +33,43 @@
     private const string ServerVersion = "WAGI/1";
     private readonly HttpContext context;
     private readonly ILogger logger;
+    private readonly ILoggerFactory loggerFactory;
+    private readonly IHttpClientFactory httpClientFactory;
     private readonly string entryPoint;
     private readonly IDictionary<string, string> volumes;
+    private readonly IDictionary<string, string> environment;
     private readonly string wasmFile;
     private readonly string moduleType;
+    private readonly List<Uri> allowedHosts;
+
+    private readonly int maxHttpRequests;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WAGIHost"/> class.
     /// </summary>
     /// <param name="context">HttpContext for the request.</param>
+    /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
     /// <param name="entryPoint">entryPoint to call in the WASM Module. </param>
     /// <param name="wasmFile">The WASM File name.</param>
     /// <param name="moduleType">Type of the module, can be either WASM or WAT.</param>
     /// <param name="volumes">The volumes to be added to the WasiConfiguration as preopened directories.</param>
-    public WAGIHost(HttpContext context, string entryPoint, string wasmFile, string moduleType, IDictionary<string, string> volumes)
+    /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
+    /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
+    /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
+    public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, string moduleType, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
     {
       this.context = context;
+      this.httpClientFactory = httpClientFactory;
       var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
-      this.logger = loggerFactory.CreateLogger(typeof(WAGIHost).Namespace);
+      this.loggerFactory = loggerFactory;
+      this.logger = loggerFactory.CreateLogger(typeof(WAGIHost).FullName);
       this.entryPoint = entryPoint ?? "_start";
       this.volumes = volumes;
       this.wasmFile = wasmFile;
       this.moduleType = moduleType;
+      this.environment = environment ?? new Dictionary<string, string>();
+      this.allowedHosts = allowedHosts;
+      this.maxHttpRequests = maxHttpRequests;
     }
 
     /// <summary>
@@ -62,38 +80,81 @@
       using var stdin = new TempFile();
       using var stdout = new TempFile();
       using var stderr = new TempFile();
-      var input = await this.GetInput();
-      using StreamWriter writer = new(stdin.Path);
-      await writer.WriteAsync(input);
-      var envvars = this.CreateWAGIEnvVars();
+      await this.WriteRequestBody(stdin);
+      var config = this.GetWasiConfiguration(stdin, stdout, stderr);
+      using var engine = new Engine();
+      using var module = this.GetWasmtimeModule(engine);
+      _ = module.Exports.Functions.SingleOrDefault<FunctionExport>(f => f.Name == this.entryPoint) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
+      using var host = new Host(engine);
+      host.DefineWasi("wasi_snapshot_preview1", config);
+      using var httpRequestHandler = this.GetHttpRequestHandler(host);
+      {
+        try
+        {
+          using dynamic instance = host.Instantiate(module);
+          var callSiteBinder = Binder.InvokeMember(CSharpBinderFlags.None, this.entryPoint, Enumerable.Empty<Type>(), instance.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
+          var callSite = CallSite<Action<CallSite, object>>.Create(callSiteBinder);
+          var stopWatch = Stopwatch.StartNew();
+          callSite.Target(callSite, instance);
+          stopWatch.Stop();
+          var elapsed = stopWatch.Elapsed;
+          this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
+        }
+        catch (WasmtimeException ex)
+        {
+          if (ex.Message == "unknown import: `wasi_experimental_http::close` has not been defined")
+          {
+            throw new ApplicationException("Allowed Hosts must be configured for modules making HTTP requests", ex);
+          }
+
+          throw;
+        }
+      }
+
+      using var stderrStream = new FileStream(stderr.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+      using var errreader = new StreamReader(stderrStream);
+
+      string line;
+      while ((line = await errreader.ReadLineAsync()) != null)
+      {
+        this.logger.LogError($"Error from Module {this.wasmFile} Function {this.entryPoint}. Error:{line.TrimEnd('\0')}");
+      }
+
+      await this.ProcessOutput(stdout.Path);
+    }
+
+    private WasiConfiguration GetWasiConfiguration(TempFile stdin, TempFile stdout, TempFile stderr)
+    {
+      var environmentVariables = this.CreateWAGIEnvVars();
       var args = this.GetArgs();
-      var config = new WasiConfiguration()
+      return new WasiConfiguration()
         .WithStandardOutput(stdout.Path)
         .WithStandardInput(stdin.Path)
         .WithStandardError(stderr.Path)
         .WithArgs(args)
-        .WithEnvironmentVariables(envvars)
+        .WithEnvironmentVariables(environmentVariables)
+        .WithEnvironment(this.environment, this.logger)
         .WithVolumes(this.volumes, this.logger);
+    }
 
-      using dynamic instance = this.GetWasmtimeInstance(config);
-      var callSiteBinder = Binder.InvokeMember(CSharpBinderFlags.None, this.entryPoint, Enumerable.Empty<Type>(), instance.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
-      var callSite = CallSite<Action<CallSite, object>>.Create(callSiteBinder);
-
-      var stopWatch = Stopwatch.StartNew();
-      callSite.Target(callSite, instance);
-      stopWatch.Stop();
-      var elapsed = stopWatch.Elapsed;
-      this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Args {string.Join(",", args)} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
-
-      using var stderrStream = new FileStream(stderr.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-      using var errreader = new StreamReader(stderrStream);
-      string line;
-      while ((line = await errreader.ReadLineAsync()) != null)
+    private HttpRequestHandler GetHttpRequestHandler(Host host)
+    {
+      HttpRequestHandler httpRequestHandler = null;
+      if (this.allowedHosts.Count > 0)
       {
-        this.logger.LogError($"Error from Module {this.wasmFile} Function {this.entryPoint} Args {string.Join(",", args)} . Error:{line}");
+        httpRequestHandler = new HttpRequestHandler(host, this.loggerFactory, this.httpClientFactory, this.maxHttpRequests, this.allowedHosts);
       }
 
-      await this.ProcessOutput(stdout.Path);
+      return httpRequestHandler;
+    }
+
+    private async Task WriteRequestBody(TempFile stdin)
+    {
+      var input = await this.GetInput();
+      using StreamWriter writer = new(stdin.Path);
+      await writer.WriteAsync(input);
+      await writer.FlushAsync();
+      writer.Close();
     }
 
     private List<(string Key, string Value)> CreateWAGIEnvVars()
@@ -119,7 +180,7 @@
 
       // TODO: implement Path Translated
       environmentVariables.Add(("PATH_TRANSLATED", req.Path));
-      environmentVariables.Add(("QUERY_STRING", req.QueryString.Value));
+      environmentVariables.Add(("QUERY_STRING", req.QueryString.HasValue ? req.QueryString.Value.Remove(0, 1) : string.Empty));
       environmentVariables.Add(("REMOTE_ADDR", this.context.Connection.RemoteIpAddress?.ToString()));
       environmentVariables.Add(("REMOTE_HOST", this.context.Connection.RemoteIpAddress?.ToString()));
 
@@ -183,7 +244,7 @@
       {
         if (endofHeaders)
         {
-          responseBuilder.AppendLine(line);
+          responseBuilder.AppendLine(line.TrimEnd('\0'));
         }
         else
         {
@@ -193,7 +254,7 @@
           }
           else
           {
-            headers.Add(line);
+            headers.Add(line.TrimEnd('\0'));
           }
         }
       }
@@ -252,16 +313,6 @@
       {
         await this.context.Response.WriteAsync(responseBuilder.ToString());
       }
-    }
-
-    private Instance GetWasmtimeInstance(WasiConfiguration config)
-    {
-      using var engine = new Engine();
-      using var module = this.GetWasmtimeModule(engine);
-      _ = module.Exports.Functions.SingleOrDefault<FunctionExport>(f => f.Name == this.entryPoint) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
-      using var host = new Host(engine);
-      host.DefineWasi("wasi_snapshot_preview1", config);
-      return host.Instantiate(module);
     }
 
     private Module GetWasmtimeModule(Engine engine)

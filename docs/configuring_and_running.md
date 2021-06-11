@@ -36,6 +36,7 @@ Example Configuration:
 ``` json
  "WASM": {
     "ModulePath": "modules",
+    "MaxHttpRequests": 20,
     "Modules": {
       "/path": {
         "FileName": "filename",
@@ -46,7 +47,18 @@ Example Configuration:
         "Environment" :{
           "ENVAR_NAME":"VALUE"
         },
-        "HttpMethod" : "POST"
+        "HttpMethod" : "POST",
+        "Authorize": true,
+        "Roles" :{
+          "Rolename"
+        },
+        "Policy" :{
+          "Policyname"
+        },
+        "AllowedHosts" :{
+          "https://host.example.com"
+        },
+        "MaxHttpRequests": 50
       }
     }
   }
@@ -56,6 +68,7 @@ Configuration for the extension is defined in a configuration section which is n
 
 - Fields
   - `ModulePath`: The path to the directory on disk where the WASM modules are located.
+  - `MaxHttpRequests`: Sets the maximum number of HTTP Requests a module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). This value can be overridden in `ModuleDetails`, if not present defaults to 10, must be a value between 1 and 500.
   - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the value is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
   - Module Object Fields
     - `filename` (REQUIRED): The path relative to `ModulePath` of the module on the file system, the file should be named either `<name>.wat` for modules in Web Assembly Text format or `<name>.wasm` for binary modules.
@@ -66,6 +79,8 @@ Configuration for the extension is defined in a configuration section which is n
     - `authorize` (default: `false`): specifies that the module should only be accessible to authenticated users.
     - `roles` : An array of roles that the user must belong to in order to access the module.
     - `policies` : An array of policies that the user must satisfy to in order to access the module.
+    - `allowedhosts` : An array of hostnames that a module using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) can make, only hostnames in this array can be accessed by the module.
+    - `maxhttprequests`: Sets the maximum number of HTTP Requests this module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). If not present defaults to `maxhttprequests` specified in `WASM` configuration, must be a value between 1 and 500.
 
 Here is a brief example of a configuration file that declares two routes:
 
@@ -239,6 +254,30 @@ It is also possible to require that the logged in user satisfies one or more [po
 In this example the the logged in user must be satisfy the ```IsASuperAdmin``` policiy.
 
 To enforce authorization on modules requires that ASP.Net is configured correctly, a simple example showing how to do this can be found [here](../examples/watmwithauth).
+
+## Making HTTP Requests from Modules
+
+Modules can make HTTP Requests using the [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) API. To use this the modules configuration must provide an array of hosts that the module commuicates with , without this modules will be unable to make requests, in addition a modules configuration may override the maximum number of requests that an instance of the module can make:
+
+```json
+"WASM": {
+    "ModulePath": "modules",
+    "Modules": {
+      "/test": {
+        "FileName": "optimized.wasm",
+        "AllowedHosts": [
+          "https://postman-echo.com/"
+        ],
+        "HttpMethod": "post",
+        "MaxHTTPRequests": 1
+      },
+    }
+}
+```
+
+Examples showing how to do this can be found [here](../examples/simplehttp). 
+The postman example is written in AssemblyScript and can be found [here] (https://github.com/simongdavies/http-wagi-as).
+The Azure example is written in Rust and can be found [here] (https://github.com/simongdavies/http-azure-rust).
 
 ## What's Next?
 
