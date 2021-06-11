@@ -74,6 +74,10 @@ jobs:
       run: dotnet restore
     - name: Set MINVERBUILDMETADATA
       run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Test
+      run: dotnet test 
     - name: Package templates
       run: dotnet pack -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
       working-directory: source/dotnettemplates
