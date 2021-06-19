@@ -20,7 +20,6 @@
   using Microsoft.Extensions.Primitives;
   using Wasi.Experimental.Http;
   using Wasmtime;
-  using Wasmtime.Exports;
 
   using static System.Net.WebUtility;
 
@@ -83,19 +82,21 @@
       await this.WriteRequestBody(stdin);
       var config = this.GetWasiConfiguration(stdin, stdout, stderr);
       using var engine = new Engine();
+      using var linker = new Linker(engine);
+      using var store = new Store(engine);
+      store.SetWasiConfiguration(config);
+      linker.DefineWasi();
+
       using var module = this.GetWasmtimeModule(engine);
-      _ = module.Exports.Functions.SingleOrDefault<FunctionExport>(f => f.Name == this.entryPoint) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
-      using var host = new Host(engine);
-      host.DefineWasi("wasi_snapshot_preview1", config);
-      using var httpRequestHandler = this.GetHttpRequestHandler(host);
+      _ = module.Exports.ToList<Export>().SingleOrDefault(f => (f.Name == this.entryPoint && f is FunctionExport)) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
+      using var httpRequestHandler = this.GetHttpRequestHandler(linker, store);
       {
         try
         {
-          using dynamic instance = host.Instantiate(module);
-          var callSiteBinder = Binder.InvokeMember(CSharpBinderFlags.None, this.entryPoint, Enumerable.Empty<Type>(), instance.GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
-          var callSite = CallSite<Action<CallSite, object>>.Create(callSiteBinder);
           var stopWatch = Stopwatch.StartNew();
-          callSite.Target(callSite, instance);
+          var instance = linker.Instantiate(store, module);
+          var entrypoint = instance.GetFunction(store, this.entryPoint);
+          entrypoint.Invoke(store);
           stopWatch.Stop();
           var elapsed = stopWatch.Elapsed;
           this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
@@ -137,12 +138,12 @@
         .WithVolumes(this.volumes, this.logger);
     }
 
-    private HttpRequestHandler GetHttpRequestHandler(Host host)
+    private HttpRequestHandler GetHttpRequestHandler(Linker linker, Store store)
     {
       HttpRequestHandler httpRequestHandler = null;
       if (this.allowedHosts.Count > 0)
       {
-        httpRequestHandler = new HttpRequestHandler(host, this.loggerFactory, this.httpClientFactory, this.maxHttpRequests, this.allowedHosts);
+        httpRequestHandler = new HttpRequestHandler(linker, store, this.loggerFactory, this.httpClientFactory, this.maxHttpRequests, this.allowedHosts);
       }
 
       return httpRequestHandler;
