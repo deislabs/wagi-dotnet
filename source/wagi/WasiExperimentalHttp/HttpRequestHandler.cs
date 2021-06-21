@@ -44,23 +44,25 @@
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpRequestHandler"/> class.
     /// </summary>
-    /// <param name="host">The WASMTime host.</param>
+    /// <param name="linker">The Wasmtime linker.</param>
+    /// <param name="store">The Wasmtime store.</param>
     /// <param name="loggerFactory">ILoggerFactory.</param>
     /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
     /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
     /// <param name="maxHttpRequests">The maximum number of requests that can be made by a module.</param>
-    public HttpRequestHandler(Host host, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, int maxHttpRequests, List<Uri> allowedHosts = null)
+    public HttpRequestHandler(Linker linker, Store store, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, int maxHttpRequests, List<Uri> allowedHosts = null)
     {
       this.logger = loggerFactory.CreateLogger(typeof(HttpRequestHandler).FullName);
       this.httpClient = httpClientFactory.CreateClient();
       this.allowedHosts = allowedHosts;
       this.maxHttpRequests = maxHttpRequests;
       this.responses = new Dictionary<int, Response>();
-      host.DefineFunction<Caller, int, int, int, int, int>(ModuleName, "body_read", this.ReadBody);
-      host.DefineFunction<Caller, int, int>(ModuleName, "close", this.Close);
-      host.DefineFunction<Caller, int, int, int, int, int, int, int, int, int, int, int>(ModuleName, "req", this.Request);
-      host.DefineFunction<Caller, int, int, int, int, int, int, int>(ModuleName, "header_get", this.GetHeader);
-      host.DefineFunction<Caller, int, int, int, int, int>(ModuleName, "headers_get_all", this.GetAllHeaders);
+
+      linker.Define(ModuleName, "body_read", Function.FromCallback<Caller, int, int, int, int, int>(store, this.ReadBody));
+      linker.Define(ModuleName, "close", Function.FromCallback<Caller, int, int>(store, this.Close));
+      linker.Define(ModuleName, "req", Function.FromCallback<Caller, int, int, int, int, int, int, int, int, int, int, int>(store, this.Request));
+      linker.Define(ModuleName, "header_get", Function.FromCallback<Caller, int, int, int, int, int, int, int>(store, this.GetHeader));
+      linker.Define(ModuleName, "headers_get_all", Function.FromCallback<Caller, int, int, int, int, int>(store, this.GetAllHeaders));
     }
 
 #pragma warning disable CS1591
@@ -85,7 +87,7 @@
 
 #pragma warning restore CS1591
 #pragma warning restore SA1600
-    private static CallerMemory GetMemory(Caller caller)
+    private static Memory GetMemory(Caller caller)
     {
       var memory = caller.GetMemory(MemoryName);
       if (memory is null)
@@ -104,8 +106,8 @@
         var memory = GetMemory(caller);
         var response = this.GetResponse(handle);
         var available = Math.Min(Convert.ToInt32(response.Content.Length) - Convert.ToInt32(response.Content.Position), bufferLength);
-        response.Content.Read(memory.Span.Slice(bufferPtr, available));
-        memory.WriteInt32(bufferWrittenPtr, available);
+        response.Content.Read(memory.GetSpan(caller).Slice(bufferPtr, available));
+        memory.WriteInt32(caller, bufferWrittenPtr, available);
         return OK;
       }
       catch (ExperimentalHttpException ex)
@@ -164,12 +166,12 @@
       try
       {
         var memory = GetMemory(caller);
-        var url = this.ValidateHostAllowed(memory, urlPtr, urlLength);
-        var method = this.ValidateMethod(memory, methodPtr, methodLength);
-        var headers = this.GetHttpRequestHeaders(memory, headersPtr, headersLength);
-        var body = this.GetRequestBody(memory, bodyPtr, bodyLength);
+        var url = this.ValidateHostAllowed(caller, memory, urlPtr, urlLength);
+        var method = this.ValidateMethod(caller, memory, methodPtr, methodLength);
+        var headers = this.GetHttpRequestHeaders(caller, memory, headersPtr, headersLength);
+        var body = this.GetRequestBody(caller, memory, bodyPtr, bodyLength);
         var httpResponseMessage = this.SendHttpRequest(url, method, headers, body);
-        memory.WriteInt32(statusCodePtr, (int)httpResponseMessage.StatusCode);
+        memory.WriteInt32(caller, statusCodePtr, (int)httpResponseMessage.StatusCode);
         var handle = Interlocked.Increment(ref this.lastResponse);
         if (handle > this.maxHttpRequests)
         {
@@ -178,7 +180,7 @@
 
         var response = new Response(httpResponseMessage);
         this.responses.Add(handle, response);
-        memory.WriteInt32(handlePtr, handle);
+        memory.WriteInt32(caller, handlePtr, handle);
         this.logger.LogTrace($"Function req created handle {handle}");
         return OK;
       }
@@ -204,7 +206,7 @@
         string headerName;
         try
         {
-          headerName = memory.ReadString(namePtr, nameLength);
+          headerName = memory.ReadString(caller, namePtr, nameLength);
         }
         catch (Exception ex)
         {
@@ -241,8 +243,8 @@
           throw new BufferTooSmallException(message);
         }
 
-        memory.WriteString(valuePtr, headerValue);
-        memory.WriteInt32(valueWrittenPtr, headerValueLength);
+        memory.WriteString(caller, valuePtr, headerValue);
+        memory.WriteInt32(caller, valueWrittenPtr, headerValueLength);
         return OK;
       }
       catch (ExperimentalHttpException ex)
@@ -285,8 +287,8 @@
           throw new BufferTooSmallException(message);
         }
 
-        memory.WriteString(bufferPtr, allHeaders.ToString());
-        memory.WriteInt32(bufferWrittenPtr, headerValuesLength);
+        memory.WriteString(caller, bufferPtr, allHeaders.ToString());
+        memory.WriteInt32(caller, bufferWrittenPtr, headerValuesLength);
         return OK;
       }
       catch (ExperimentalHttpException ex)
@@ -302,12 +304,12 @@
       }
     }
 
-    private string ValidateHostAllowed(CallerMemory memory, int urlPtr, int urlLength)
+    private string ValidateHostAllowed(Caller caller, Memory memory, int urlPtr, int urlLength)
     {
       string url;
       try
       {
-        url = memory.ReadString(urlPtr, urlLength);
+        url = memory.ReadString(caller, urlPtr, urlLength);
       }
       catch (Exception ex)
       {
@@ -339,12 +341,12 @@
       return url;
     }
 
-    private string ValidateMethod(CallerMemory memory, int methodPtr, int methodLength)
+    private string ValidateMethod(Caller caller, Memory memory, int methodPtr, int methodLength)
     {
       string method;
       try
       {
-        method = memory.ReadString(methodPtr, methodLength);
+        method = memory.ReadString(caller, methodPtr, methodLength);
       }
       catch (Exception ex)
       {
@@ -369,13 +371,13 @@
       return method;
     }
 
-    private Dictionary<string, string> GetHttpRequestHeaders(CallerMemory memory, int headersPtr, int headersLength)
+    private Dictionary<string, string> GetHttpRequestHeaders(Caller caller, Memory memory, int headersPtr, int headersLength)
     {
       var headers = new Dictionary<string, string>();
       string headersAsString;
       try
       {
-        headersAsString = memory.ReadString(headersPtr, headersLength);
+        headersAsString = memory.ReadString(caller, headersPtr, headersLength);
       }
       catch (Exception ex)
       {
@@ -404,12 +406,12 @@
       return headers;
     }
 
-    private byte[] GetRequestBody(CallerMemory memory, int bodyPtr, int bodyLength)
+    private byte[] GetRequestBody(Caller caller, Memory memory, int bodyPtr, int bodyLength)
     {
       byte[] body;
       try
       {
-        body = memory.Span.Slice(bodyPtr, bodyLength).ToArray();
+        body = memory.GetSpan(caller).Slice(bodyPtr, bodyLength).ToArray();
       }
       catch (Exception ex)
       {
