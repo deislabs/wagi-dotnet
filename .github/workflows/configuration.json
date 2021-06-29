@@ -25,6 +25,10 @@
       "labels": [
         "dependencies"
       ]
+    },
+    {
+      "title": "## 🏷️ Uncategorized",
+      "labels": []
     }
   ]
 }
