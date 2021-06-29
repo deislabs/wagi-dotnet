@@ -7,14 +7,12 @@
     using System.IO;
     using System.Linq;
     using System.Net.Http;
-    using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
     using Deislabs.WAGI.Extensions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.Routing;
-    using Microsoft.CSharp.RuntimeBinder;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
@@ -38,8 +36,8 @@
         private readonly IDictionary<string, string> volumes;
         private readonly IDictionary<string, string> environment;
         private readonly string wasmFile;
-        private readonly string moduleType;
         private readonly List<Uri> allowedHosts;
+        private readonly IModuleResolver moduleResolver;
 
         private readonly int maxHttpRequests;
 
@@ -50,12 +48,12 @@
         /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
         /// <param name="entryPoint">entryPoint to call in the WASM Module. </param>
         /// <param name="wasmFile">The WASM File name.</param>
-        /// <param name="moduleType">Type of the module, can be either WASM or WAT.</param>
+        /// <param name="moduleResolver">Module resolver to get wasmtime Module and Engine.</param>
         /// <param name="volumes">The volumes to be added to the WasiConfiguration as preopened directories.</param>
         /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
         /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
         /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
-        public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, string moduleType, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
+        public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
         {
             this.context = context;
             this.httpClientFactory = httpClientFactory;
@@ -65,10 +63,10 @@
             this.entryPoint = entryPoint ?? "_start";
             this.volumes = volumes;
             this.wasmFile = wasmFile;
-            this.moduleType = moduleType;
             this.environment = environment ?? new Dictionary<string, string>();
             this.allowedHosts = allowedHosts;
             this.maxHttpRequests = maxHttpRequests;
+            this.moduleResolver = moduleResolver;
         }
 
         /// <summary>
@@ -81,13 +79,13 @@
             using var stderr = new TempFile();
             await this.WriteRequestBody(stdin);
             var config = this.GetWasiConfiguration(stdin, stdout, stderr);
-            using var engine = new Engine();
+            var engine = this.moduleResolver.Engine;
             using var linker = new Linker(engine);
             using var store = new Store(engine);
             store.SetWasiConfiguration(config);
             linker.DefineWasi();
 
-            using var module = this.GetWasmtimeModule(engine);
+            var module = this.moduleResolver.GetWASMModule(this.wasmFile);
             _ = module.Exports.ToList<Export>().SingleOrDefault(f => (f.Name == this.entryPoint && f is FunctionExport)) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
             using var httpRequestHandler = this.GetHttpRequestHandler(linker, store);
             {
@@ -99,7 +97,7 @@
                     entrypoint.Invoke(store);
                     stopWatch.Stop();
                     var elapsed = stopWatch.Elapsed;
-                    this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}:{elapsed.Milliseconds:000} seconds");
+                    this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}.{elapsed.Milliseconds:000}{((elapsed.Ticks) / 10 % 1000):000} seconds");
                 }
                 catch (WasmtimeException ex)
                 {
@@ -314,16 +312,6 @@
             {
                 await this.context.Response.WriteAsync(responseBuilder.ToString());
             }
-        }
-
-        private Module GetWasmtimeModule(Engine engine)
-        {
-            return this.moduleType switch
-            {
-                "WASM" => Module.FromFile(engine, this.wasmFile),
-                "WAT" => Module.FromTextFile(engine, this.wasmFile),
-                _ => throw new ArgumentException($"invalid module type {this.moduleType} for File {this.wasmFile}"),
-            };
         }
 
         private void AddHeader(string key, string value) => this.context.Response.Headers.TryAdd(key, value);

@@ -35,6 +35,7 @@ Example Configuration:
 
 ``` json
  "WASM": {
+    "CacheConfigPath" : "cache.toml"
     "ModulePath": "modules",
     "MaxHttpRequests": 20,
     "Modules": {
@@ -67,6 +68,7 @@ Example Configuration:
 Configuration for the extension is defined in a configuration section which is named `WASM` by default, any valid name can be used for this section, if you use a non default name then you should pass the section name to the ```MapWASMModules``` extension method.
 
 - Fields
+  - `CacheConfigPath` The path to a wasmtime cache configuration file see [here](#enabling-caching) for details. 
   - `ModulePath`: The path to the directory on disk where the WASM modules are located.
   - `MaxHttpRequests`: Sets the maximum number of HTTP Requests a module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). This value can be overridden in `ModuleDetails`, if not present defaults to 10, must be a value between 1 and 500.
   - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the value is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
@@ -278,6 +280,36 @@ Modules can make HTTP Requests using the [wasi-experimental-http](https://github
 Examples showing how to do this can be found [here](../examples/simplehttp). 
 The postman example is written in AssemblyScript and can be found [here] (https://github.com/simongdavies/http-wagi-as).
 The Azure example is written in Rust and can be found [here] (https://github.com/simongdavies/http-azure-rust).
+
+## Enabling Caching
+
+To enable the [Wasmtime cache](https://docs.wasmtime.dev/cli-cache.html), which caches the result of the compilation
+of a WebAssembly module, resulting in improved instantiation times for modules, you can create a `cache.toml` file
+with the following structure:
+
+```toml
+[cache]
+enabled = true
+directory = "<absolute-path-to-a-cache-directory>"
+# optional
+# see more details at https://docs.wasmtime.dev/cli-cache.html
+cleanup-interval = "1d"
+files-total-size-soft-limit = "10Gi"
+```
+
+Then update the configuration to use it:
+
+```json
+"WASM": {
+    "CacheConfigPath" : "cache.toml",
+    "ModulePath": "modules",
+    "Modules": {
+      "/test": {
+        "FileName": "test.wasm
+      }
+    }
+}
+```
 
 ## What's Next?
 
