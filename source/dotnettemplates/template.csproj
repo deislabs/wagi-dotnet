@@ -9,7 +9,7 @@
     <PackageTags>dotnet-new;templates;WASM;WAGI;WASI;WebAssembly;wasmtime;</PackageTags>
     <TargetFramework>net5.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>NU5105;NU5128;0419,0649</NoWarn>
+    <NoWarn>CA1014;NU5105;NU5128;0419,0649</NoWarn>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
