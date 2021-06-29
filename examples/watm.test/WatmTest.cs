@@ -1,27 +1,27 @@
-﻿using Xunit;
-using Watm;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Watm;
+using Xunit;
 
 namespace Watm.Test
 {
-  public class WatmTest
-  {
-    private readonly WebApplicationFactory<Startup> factory;
-    public WatmTest()
+    public class WatmTest
     {
-      factory = new WebApplicationFactory<Startup>();
-    }
-    [Fact]
-    public async Task TestInvokeWASM()
-    {
-      var client = factory.CreateClient();
+        private readonly WebApplicationFactory<Startup> factory;
+        public WatmTest()
+        {
+            factory = new WebApplicationFactory<Startup>();
+        }
+        [Fact]
+        public async Task TestInvokeWASM()
+        {
+            var client = factory.CreateClient();
 
-      var response = await client.GetAsync("/hellowat");
-      var result = await response.Content.ReadAsStringAsync();
-      Assert.Equal("Hello World!", result.TrimEnd());
-      Assert.True(response.IsSuccessStatusCode);
+            var response = await client.GetAsync("/hellowat");
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Hello World!", result.TrimEnd());
+            Assert.True(response.IsSuccessStatusCode);
 
+        }
     }
-  }
 }
