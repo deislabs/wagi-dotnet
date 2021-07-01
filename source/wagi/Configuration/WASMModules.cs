@@ -9,6 +9,11 @@ namespace Deislabs.WAGI.Configuration
     public class WASMModules
     {
         /// <summary>
+        /// Gets or sets path where the wasmtime cache configuration can be found.
+        /// </summary>
+        public string CacheConfigPath { get; set; }
+
+        /// <summary>
         /// Gets or sets path where WASM Modules can be found.
         /// </summary>
         public string ModulePath { get; set; }

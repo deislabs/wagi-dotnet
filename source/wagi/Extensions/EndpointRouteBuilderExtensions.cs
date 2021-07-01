@@ -5,7 +5,9 @@
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Threading;
     using Deislabs.WAGI.Configuration;
+    using Deislabs.WAGI.Helpers;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Routing;
@@ -13,12 +15,14 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Wasi.Experimental.Http;
+    using Wasmtime;
 
     /// <summary>
     /// Provides extension methods for <see cref="IEndpointRouteBuilder"/> to add routes.
     /// </summary>
     public static class EndpointRouteBuilderExtensions
     {
+        private static Lazy<ModuleResolver> moduleResolver;
         /// <summary>
         /// Adds a route endpoint to the <see cref="IEndpointRouteBuilder"/> for each WASM Function defined in configuration.
         /// </summary>
@@ -42,11 +46,34 @@
             }
             else
             {
+
                 moduleConfig.Bind(modules);
                 if (!Directory.Exists(modules.ModulePath))
                 {
                     throw new ApplicationException($"Module Path not found {modules.ModulePath}");
                 }
+
+                string cacheConfig = null;
+                if (!string.IsNullOrEmpty(modules.CacheConfigPath))
+                {
+                    if (File.Exists(modules.CacheConfigPath))
+                    {
+                        logger.LogTrace($"Using {modules.CacheConfigPath} as cache configuration");
+                        cacheConfig = modules.CacheConfigPath;
+                    }
+                    else
+                    {
+                        logger.LogError($"Wasmtime cache config file {modules.CacheConfigPath} does not exist");
+                    }
+                }
+
+                moduleResolver = new Lazy<ModuleResolver>(() =>
+                    {
+                        var config = new Config();
+                        return new ModuleResolver(config.WithCacheConfig(cacheConfig));
+                    },
+                    LazyThreadSafetyMode.ExecutionAndPublication
+                );
 
                 var defaultHttpRequestLimit = HttpRequestHandler.DefaultHttpRequestLimit;
                 if (modules.MaxHttpRequests > 0 && modules.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
@@ -115,7 +142,7 @@
                         logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
                         var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
                         {
-                            await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleType, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
+                            await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
                         });
 
                         if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
