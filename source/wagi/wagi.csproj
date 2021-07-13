@@ -32,4 +32,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\bindle-dotnet\Bindle\Bindle.csproj" />
+  </ItemGroup>
+
 </Project>

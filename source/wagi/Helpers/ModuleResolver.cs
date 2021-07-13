@@ -5,7 +5,7 @@ namespace Deislabs.WAGI.Helpers
     using Wasmtime;
 
     /// <summary>
-    /// Module Resolver resolves WASM Files into wasmtime Modules.
+    /// ModuleResolver resolves WASM Files into wasmtime Modules.
     /// </summary>
     public class ModuleResolver : IModuleResolver, IDisposable
     {

@@ -1,3 +1,4 @@
+using System;
 #pragma warning disable CA2227
 namespace Deislabs.WAGI.Configuration
 {
@@ -24,9 +25,14 @@ namespace Deislabs.WAGI.Configuration
         public int MaxHttpRequests { get; set; }
 
         /// <summary>
-        /// Gets or sets details of modules that can be executed via the command line or HTTP Requests.
+        /// Gets or sets details of modules that can be executed via HTTP Requests, the key is the path to make the module available at.
         /// </summary>
-        public Dictionary<string, WASMModuleDetails> Modules { get; set; }
+        public Dictionary<string, WASMModuleInfo> Modules { get; set; }
+
+        /// <summary>
+        /// Gets or sets details of bindles that contain modules that can be executed via HTTP Requests, the key is the path prefix to make the modules in the bindle available at.
+        /// </summary>
+        public Dictionary<string, BindleInfo> Bindles { get; set; }
     }
 }
 #pragma warning restore CA2227

@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Net.Http;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Bindle;
     using Deislabs.WAGI.Configuration;
     using Deislabs.WAGI.Helpers;
     using Microsoft.AspNetCore.Authorization;
@@ -46,8 +48,12 @@
             }
             else
             {
-
                 moduleConfig.Bind(modules);
+                if (modules.Bindles.Any())
+                {
+                    LoadBindles(modules, loggerFactory);
+                }
+
                 if (!Directory.Exists(modules.ModulePath))
                 {
                     throw new ApplicationException($"Module Path not found {modules.ModulePath}");
@@ -172,6 +178,12 @@
             }
 
             return new WAGIEndPointConventionBuilder(endpointConventionBuilders);
+        }
+
+        private static void LoadBindles(WASMModules modules, ILoggerFactory loggerFactory)
+        {
+            var bindleResolver = new BindleResolver(modules, loggerFactory);
+            bindleResolver.LoadInvoice().Wait();
         }
 
         private static string GetHTTPMethod(string httpMethod, string route)

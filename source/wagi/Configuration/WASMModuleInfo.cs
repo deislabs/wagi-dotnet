@@ -7,7 +7,7 @@ namespace Deislabs.WAGI.Configuration
     /// <summary>
     /// This class contains configuration for properties for an exposed WASM function.
     /// </summary>
-    public class WASMModuleDetails
+    public class WASMModuleInfo
     {
         /// <summary>
         /// Gets or Sets the Module filename.
