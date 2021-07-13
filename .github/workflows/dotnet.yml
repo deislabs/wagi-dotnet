@@ -45,9 +45,25 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - uses: ./.github/workflows/build-and-test
-      with:
-        configuration: ${{ matrix.config }}
+    - name: Restore
+      run: dotnet restore
+      shell: bash
+    - name: Set MINVERBUILDMETADATA
+      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+      shell: bash
+    - name: Build
+      run: dotnet build -c ${{ matrix.config }}
+      shell: bash
+    - name: Test
+      shell: bash
+      env:
+        TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+        TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
+      run: dotnet test -c ${{ matrix.config }}
+    - name: Package templates
+      run: dotnet pack -c ${{ matrix.config }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
+      working-directory: source/dotnettemplates
+      shell: bash
   publish:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
@@ -59,9 +75,25 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - uses: ./.github/workflows/build-and-test
-      with:
-        configuration: ${{ matrix.config }}
+    - name: Restore
+      run: dotnet restore
+      shell: bash
+    - name: Set MINVERBUILDMETADATA
+      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+      shell: bash
+    - name: Build
+      run: dotnet build -c ${{ matrix.config }}
+      shell: bash
+    - name: Test
+      shell: bash
+      env:
+        TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+        TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
+      run: dotnet test -c ${{ matrix.config }}
+    - name: Package templates
+      run: dotnet pack -c ${{ matrix.config }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
+      working-directory: source/dotnettemplates
+      shell: bash
     - name: Publish Github Packages
       run: |
            for nupkg in $(find . -name *.nupkg)
@@ -82,9 +114,25 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
-      - uses: ./.github/workflows/build-and-test
-        with:
-          configuration: ${{ matrix.config }}
+      - name: Restore
+        run: dotnet restore
+        shell: bash
+      - name: Set MINVERBUILDMETADATA
+        run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+        shell: bash
+      - name: Build
+        run: dotnet build -c ${{ matrix.config }}
+        shell: bash
+      - name: Test
+        shell: bash
+        env:
+          TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+          TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
+        run: dotnet test -c ${{ matrix.config }}
+      - name: Package templates
+        run: dotnet pack -c ${{ matrix.config }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
+        working-directory: source/dotnettemplates
+        shell: bash
 
       - name: "Build Changelog"
         id: github_release
