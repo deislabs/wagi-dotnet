@@ -111,7 +111,7 @@ jobs:
               dotnet nuget push $nupkg --api-key ${{ secrets.GHPACKAGES_PAT }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate
             done
         shell: bash
-    - name: Publish Nuget Packages
+      - name: Publish Nuget Packages
         run: |
             for nupkg in $(find . -name *.nupkg)
             do
