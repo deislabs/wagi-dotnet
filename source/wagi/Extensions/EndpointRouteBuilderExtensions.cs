@@ -49,7 +49,7 @@
             else
             {
                 moduleConfig.Bind(modules);
-                if (modules.Bindles.Any())
+                if (modules.Bindles?.Any() ?? default)
                 {
                     LoadBindles(modules, loggerFactory);
                 }
