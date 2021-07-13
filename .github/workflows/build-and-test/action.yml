@@ -1,0 +1,29 @@
+name: "Build And Test Action"
+description: "Builds and Tests wagi-dotnet"
+inputs:
+  configuration: 
+    description: 'The Configration to build and test'
+    required: true
+    default: 'release'
+runs:
+  using: "composite"
+  steps: 
+    - name: Restore dependencies
+      run: dotnet restore
+      shell: bash
+    - name: Set MINVERBUILDMETADATA
+      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+      shell: bash
+    - name: Build
+      run: dotnet build -c ${{ inputs.configuration }}
+      shell: bash
+    - name: Test
+      shell: bash
+      env:
+        TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
+        TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
+      run: dotnet test -c ${{ inputs.configuration }}
+    - name: Package templates
+      run: dotnet pack -c ${{ inputs.configuration }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
+      working-directory: source/dotnettemplates
+      shell: bash

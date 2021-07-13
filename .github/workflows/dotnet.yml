@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -44,21 +45,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Set MINVERBUILDMETADATA
-      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
-      shell: bash
-    - name: Build
-      run: dotnet build -c ${{ matrix.config }}
-    - name: Test
-      env:
-        TEST_STORAGE_ACCOUNT_NAME: ${{ secrets.TEST_STORAGE_ACCOUNT_NAME }}
-        TEST_STORAGE_ACCOUNT_KEY: ${{ secrets.TEST_STORAGE_ACCOUNT_KEY }} 
-      run: dotnet test -c ${{ matrix.config }}
-    - name: Package templates
-      run: dotnet pack -c ${{ matrix.config }} -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
-      working-directory: source/dotnettemplates
+    - uses: ./.github/workflows/build-and-test
+      with:
+        configuration: ${{ matrix.config }}
   publish:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
@@ -70,17 +59,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Set MINVERBUILDMETADATA
-      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
-    - name: Build
-      run: dotnet build --configuration Release
-    - name: Test
-      run: dotnet test 
-    - name: Package templates
-      run: dotnet pack -p:RepositoryUrl=https://github.com/${{ github.repository }}.git 
-      working-directory: source/dotnettemplates
+    - uses: ./.github/workflows/build-and-test
+      with:
+        configuration: ${{ matrix.config }}
     - name: Publish Github Packages
       run: |
            for nupkg in $(find . -name *.nupkg)
@@ -89,21 +70,21 @@ jobs:
             dotnet nuget push $nupkg --api-key ${{ secrets.GHPACKAGES_PAT }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate
            done
       shell: bash
-    - name: Publish Nuget Packages
-      if: startsWith( github.ref, 'refs/tags/' )
-      run: |
-           for nupkg in $(find . -name *.nupkg)
-           do
-            echo Pushing $nupkg
-            dotnet nuget push $nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-           done
-      shell: bash
   release:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - uses: ./.github/workflows/build-and-test
+        with:
+          configuration: ${{ matrix.config }}
 
       - name: "Build Changelog"
         id: github_release
@@ -122,3 +103,19 @@ jobs:
           prerelease: ${{ contains(github.ref, '-preview') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Github Packages
+        run: |
+            for nupkg in $(find . -name *.nupkg)
+            do
+              echo Pushing $nupkg
+              dotnet nuget push $nupkg --api-key ${{ secrets.GHPACKAGES_PAT }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate
+            done
+        shell: bash
+    - name: Publish Nuget Packages
+        run: |
+            for nupkg in $(find . -name *.nupkg)
+            do
+              echo Pushing $nupkg
+              dotnet nuget push $nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+            done
+        shell: bash

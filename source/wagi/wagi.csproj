@@ -8,7 +8,7 @@
     <PackageId>Deislabs.WAGI</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/deislabs/wagi-dotnet</PackageProjectUrl>
-    <!-- <PackageReadmeFile>readme.md</PackageReadmeFile> -->
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/deislabs/wagi-dotnet/releases</PackageReleaseNotes>
     <PackageTags>WASM;WAGI;WASI;Wasmtime;WebAssembly;</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -17,8 +17,6 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <TargetFramework>net5.0</TargetFramework>
-    <!-- See https://github.com/NuGet/Home/issues/10791 -->
-    <!-- <IncludeSymbols>true</IncludeSymbols> -->
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
@@ -27,6 +25,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Wasmtime" Version="0.28.0-preview1" />
     <None Include="docs\readme.md" Pack="true" PackagePath="" />
+    <!-- See https://github.com/NuGet/Home/issues/10791 -->
+    <!-- The following reference can be removed once this issue is resolved. -->
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.9.1"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
