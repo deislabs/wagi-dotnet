@@ -38,7 +38,7 @@ namespace BindleSource.Test
         {
             var client = factory.CreateClient();
 
-            var response = await client.GetAsync();
+            var response = await client.GetAsync("/");
             var result = await response.Content.ReadAsStringAsync();
             Assert.Equal("Hello, world from 1.0.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
