@@ -27,7 +27,7 @@
     <None Include="docs\readme.md" Pack="true" PackagePath="" />
     <!-- See https://github.com/NuGet/Home/issues/10791 -->
     <!-- The following reference can be removed once this issue is resolved. -->
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.9.1"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.10.0"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
