@@ -19,6 +19,8 @@ namespace Deislabs.WAGI.Helpers
         private readonly WASMModules wasmModules;
         private readonly ILogger logger;
 
+        private static string CachePath => Path.Combine(Directory.GetCurrentDirectory(), "bindlecache");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BindleResolver"/> class.
         /// </summary>
@@ -112,23 +114,26 @@ namespace Deislabs.WAGI.Helpers
 
         private async Task GetParcelAsset(string assetPath, string parcelId, string name, string bindleName, BindleClient bindleClient)
         {
-            var parcelFilePath = Path.Join(assetPath, name);
-            if (File.Exists(parcelFilePath))
-            {
-                logger.LogTrace($"Skipping Downloading file {parcelFilePath} as it already exists");
-                return;
-            }
-
+            var parcelFileCachePath = Path.Join(CachePath, parcelId);
+            var parcelFileModulePath = Path.Join(assetPath, name);
             var rootPath = Path.GetFullPath(assetPath);
-            var parcelFullPath = Path.GetFullPath(parcelFilePath);
+            var parcelFullPath = Path.GetFullPath(parcelFileModulePath);
             if (!parcelFullPath.StartsWith(rootPath, true, CultureInfo.InvariantCulture))
             {
                 throw new ApplicationException($"Attempt to traverse file system with path {name}");
             }
-            Directory.CreateDirectory(Path.GetDirectoryName(parcelFilePath));
-            var parcelBytes = await GetParcel(bindleName, parcelId, bindleClient);
-            logger.LogTrace($"Writing File {parcelFilePath}.");
-            await File.WriteAllBytesAsync(parcelFilePath, parcelBytes);
+            Directory.CreateDirectory(Path.GetDirectoryName(parcelFileModulePath));
+            if (!File.Exists(parcelFileCachePath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(parcelFileCachePath));
+                var parcelBytes = await GetParcel(bindleName, parcelId, bindleClient);
+                logger.LogTrace($"Writing File {parcelFileCachePath}.");
+                await File.WriteAllBytesAsync(parcelFileCachePath, parcelBytes);
+            }
+            // The file should not ever exist but it does not matter if it is overwritten.
+            // This may need revising when dynamic updates are supported.
+            logger.LogTrace($"Copying Cached File {parcelFileCachePath} to {parcelFileModulePath}.");
+            File.Copy(parcelFileCachePath, parcelFileModulePath, true);
         }
 
         private async Task<byte[]> GetParcel(string invoiceId, string parcelId, BindleClient bindleClient)

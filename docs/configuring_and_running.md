@@ -29,7 +29,7 @@ Notice that there is an error message produced as the extension is not yet confi
 
 ## Configuration
 
-The extension is driven by configuration which can be provided using any [.NET configuration provider](https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration). The following examples assume that a json file is being used.
+The extension is driven by configuration which can be provided using any [dotnet configuration provider](https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration). The following examples assume that a json file is being used.
 
 Example Configuration:
 
@@ -62,6 +62,12 @@ Example Configuration:
         "MaxHttpRequests": 50
       }
     }
+    "Bindles" :{
+      "/anotherpath" :{
+        "BindleUrl": "https://some.bindleserver.com/v1",
+        "Name": "example.bindles/myapp/1.0.0"
+      }
+    }
   }
 ```
 
@@ -71,7 +77,7 @@ Configuration for the extension is defined in a configuration section which is n
   - `CacheConfigPath` The path to a wasmtime cache configuration file see [here](#enabling-caching) for details. 
   - `ModulePath`: The path to the directory on disk where the WASM modules are located.
   - `MaxHttpRequests`: Sets the maximum number of HTTP Requests a module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). This value can be overridden in `ModuleDetails`, if not present defaults to 10, must be a value between 1 and 500.
-  - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the value is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
+  - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the *value* is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
   - Module Object Fields
     - `filename` (REQUIRED): The path relative to `ModulePath` of the module on the file system, the file should be named either `<name>.wat` for modules in Web Assembly Text format or `<name>.wasm` for binary modules.
     - `environment`: Key value pairs of strings where the key is an environment variable name and the value is an environment variable value. Each entry respresents an Environment Variables created in the modules environment at runtime.
@@ -83,6 +89,10 @@ Configuration for the extension is defined in a configuration section which is n
     - `policies` : An array of policies that the user must satisfy to in order to access the module.
     - `allowedhosts` : An array of hostnames that a module using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) can make, only hostnames in this array can be accessed by the module.
     - `maxhttprequests`: Sets the maximum number of HTTP Requests this module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). If not present defaults to `maxhttprequests` specified in `WASM` configuration, must be a value between 1 and 500.
+  - `Bindles` : Bindles is a key value pair object where each item defines a [bindle](https://github.com/deislabs/bindle) hosted in a bindle server that contains details of modules to be exposed by the server. Like the `Modules` property the *key* is a path pattern used to create routes, the *value* is a Bindle Object.
+    - Bindle Object Fields
+      - `BindleUrl` (REQUIRED): The Url of the bindle server where the bindle is hosted.
+      - `Name` (REQUIRED): The Name of the bindle to be loaded from the bindle server.
 
 Here is a brief example of a configuration file that declares two routes:
 
@@ -310,6 +320,24 @@ Then update the configuration to use it:
     }
 }
 ```
+
+## Using Bindle 
+
+To load modules defined as bindle create one or more bindle configuration entries, each entry contains the URL to a Bindle server and the name of the bindle containing the modules to configure:
+
+```
+"WASM": {
+  "ModulePath": "modules",
+  "Bindles": {
+    "/": {
+      "BindleUrl": "https://some.bindleserver.com/v1",
+      "Name": "example.bindles/myapp/1.0.0"
+    }
+  }
+}
+```
+
+In the above example when the `MapWASMModules` extension method is called it will retrieve details of any WASM/WAGI Modules contained in the bindle at the bindle server URL and will download the modules and any associated artefacts, it will then configure modules and routes as defined in the bindle, each route will be a child path of the path in the key for this item.
 
 ## What's Next?
 

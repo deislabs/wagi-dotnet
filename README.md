@@ -94,6 +94,7 @@ dotnet build -c Release
 - [watm](examples/watm/README.md): Hello World ! written in [Web Assembly Text Format](https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format)
 - [watmwithauth](examples/watmwithauth/README.md): watm Hello world example showing how to use Authorisation, Roles and Policy.
 - [simplehttp](examples/simplehttp/README.md): Shows how to use [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) to make HTTP Requests from modules, there is an example written in AssemblyScript which calls https://postman-echo.com/ ([Source](https://github.com/simongdavies/http-wagi-as)) and an example written in Rust which uses an experimental version of the [Azure SDK for Rust](https://github.com/radu-matei/azure-sdk-for-rust/tree/enable-wasi-experimental-http) to read and write a blob to Azure Storage ([Source](https://github.com/simongdavies/http-azure-rust)).
+- [bindle](examples/bindle/README.md): An example showing how to use [bindle](https://github.com/deislabs/bindle) to provide modules to be hosted by wagi-dotnet.
 
 ### Other examples
 

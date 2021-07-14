@@ -6,8 +6,6 @@
     using System.Linq;
     using System.Net.Http;
     using System.Threading;
-    using System.Threading.Tasks;
-    using Bindle;
     using Deislabs.WAGI.Configuration;
     using Deislabs.WAGI.Helpers;
     using Microsoft.AspNetCore.Authorization;
@@ -177,7 +175,7 @@
                 }
             }
 
-            return new WAGIEndPointConventionBuilder(endpointConventionBuilders);
+            return new WagiEndPointConventionBuilder(endpointConventionBuilders);
         }
 
         private static void LoadBindles(WASMModules modules, ILoggerFactory loggerFactory)

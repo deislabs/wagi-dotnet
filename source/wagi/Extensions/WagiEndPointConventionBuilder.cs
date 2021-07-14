@@ -5,17 +5,17 @@ namespace Deislabs.WAGI.Extensions
     using Microsoft.AspNetCore.Builder;
 
     /// <summary>
-    /// WAGIEndPointConventionBuilder implements IEndpointConventionBuilder for WASMModules.
+    /// WagiEndPointConventionBuilder implements IEndpointConventionBuilder for WASMModules.
     /// </summary>
-    public sealed class WAGIEndPointConventionBuilder : IEndpointConventionBuilder
+    public sealed class WagiEndPointConventionBuilder : IEndpointConventionBuilder
     {
         private readonly IList<IEndpointConventionBuilder> endpointConventionBuilders;
 
         /// <summary>
-        ///  Initializes a new instance of the <see cref="WAGIEndPointConventionBuilder"/> class.
+        ///  Initializes a new instance of the <see cref="WagiEndPointConventionBuilder"/> class.
         /// </summary>
         /// <param name="endpointConventionBuilders">List of IEndPointConventionBuilders.</param>
-        public WAGIEndPointConventionBuilder(IList<IEndpointConventionBuilder> endpointConventionBuilders)
+        public WagiEndPointConventionBuilder(IList<IEndpointConventionBuilder> endpointConventionBuilders)
         {
             this.endpointConventionBuilders = endpointConventionBuilders;
         }
