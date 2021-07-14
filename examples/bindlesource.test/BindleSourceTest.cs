@@ -34,7 +34,7 @@ namespace BindleSource.Test
         }
 
         [Fact]
-        public async Task TestInvokeVersion1()
+        public async Task TestInvokeRoot()
         {
             var client = factory.CreateClient();
 
