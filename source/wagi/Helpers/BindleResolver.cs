@@ -134,6 +134,7 @@ namespace Deislabs.WAGI.Helpers
             }
             // The file should not ever exist but it does not matter if it is overwritten.
             // This may need revising when dynamic updates are supported.
+            // TODO dont copy the file if it already exists and is not changed (it should be immutable)
             logger.LogTrace($"Copying Cached File {parcelFileCachePath} to {parcelFileModulePath}.");
             File.Copy(parcelFileCachePath, parcelFileModulePath, true);
         }

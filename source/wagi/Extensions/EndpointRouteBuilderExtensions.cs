@@ -7,6 +7,7 @@
     using System.Net.Http;
     using System.Threading;
     using Deislabs.WAGI.Configuration;
+    using Deislabs.WAGI.DataSource;
     using Deislabs.WAGI.Helpers;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -14,6 +15,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Wasi.Experimental.Http;
     using Wasmtime;
 
@@ -22,53 +24,67 @@
     /// </summary>
     public static class EndpointRouteBuilderExtensions
     {
+
+        /// <summary>
+        /// Adds a route endpoint to the <see cref="IEndpointRouteBuilder"/> for each WASM Function defined in configuration.
+        /// </summary>
+        /// <param name="endpoints">The <see cref="IEndpointRouteBuilder"/> instance being extended. </param>
+        /// <returns>IEndpointConventionBuilder to configure endpoints.</returns>
+        public static IEndpointConventionBuilder MapWagiModules(this IEndpointRouteBuilder endpoints)
+        {
+            if (endpoints == null)
+            {
+                throw new ArgumentNullException(nameof(endpoints));
+            }
+
+            var dataSource = endpoints.ServiceProvider.GetRequiredService<WagiEndpointDataSource>();
+            if (dataSource == null)
+            {
+                throw new InvalidOperationException("Unable to find the required services. Please add all the required services by calling 'IServiceCollection.AddWASM(...)' inside the call to 'ConfigureServices(...)' in the application startup code.");
+            }
+
+            endpoints.DataSources.Add(dataSource);
+            return dataSource;
+        }
+
+
         private static Lazy<ModuleResolver> moduleResolver;
         /// <summary>
         /// Adds a route endpoint to the <see cref="IEndpointRouteBuilder"/> for each WASM Function defined in configuration.
         /// </summary>
         /// <param name="endpoints">The <see cref="IEndpointRouteBuilder"/> instance being extended. </param>
-        /// <param name="section">The configuration section containing the modules to be processed. </param>
         /// <returns>IEndpointConventionBuilder to configure endpoints.</returns>
         public static IEndpointConventionBuilder MapWASMModules(
-          this IEndpointRouteBuilder endpoints,
-          string section = "WASM")
+          this IEndpointRouteBuilder endpoints)
         {
             var loggerFactory = endpoints?.ServiceProvider.GetService<ILoggerFactory>();
-            var httpClientFactory = endpoints?.ServiceProvider.GetService<IHttpClientFactory>();
+            var httpClientFactory = endpoints.ServiceProvider.GetService<IHttpClientFactory>();
             var logger = loggerFactory.CreateLogger(typeof(EndpointRouteBuilderExtensions).FullName);
             var endpointConventionBuilders = new List<IEndpointConventionBuilder>();
             var configuration = endpoints.ServiceProvider.GetService<IConfiguration>();
-            var modules = new WASMModules();
-            var moduleConfig = configuration.GetSection(section);
-            if (!moduleConfig.Exists())
+            var modules = endpoints.ServiceProvider.GetService<WASMModules>();
+            if (modules == null)
             {
-                logger.LogError($"No configuration found in section {section}");
+                throw new InvalidOperationException("Unable to find the required services. Please add all the required services by calling 'IServiceCollection.AddWASM(...)' inside the call to 'ConfigureServices(...)' in the application startup code.");
             }
             else
             {
-                moduleConfig.Bind(modules);
+                var optionsManager = endpoints.ServiceProvider.GetService<IOptionsMonitor<WASMModules>>();
+                optionsManager.OnChange<WASMModules>((modules) =>
+                {
+                    logger.LogTrace($"Configuration has changed, there are now {modules.Bindles.Count} bindles");
+                });
+
                 if (modules.Bindles?.Any() ?? default)
                 {
                     LoadBindles(modules, loggerFactory);
                 }
 
-                if (!Directory.Exists(modules.ModulePath))
-                {
-                    throw new ApplicationException($"Module Path not found {modules.ModulePath}");
-                }
-
                 string cacheConfig = null;
                 if (!string.IsNullOrEmpty(modules.CacheConfigPath))
                 {
-                    if (File.Exists(modules.CacheConfigPath))
-                    {
-                        logger.LogTrace($"Using {modules.CacheConfigPath} as cache configuration");
-                        cacheConfig = modules.CacheConfigPath;
-                    }
-                    else
-                    {
-                        logger.LogError($"Wasmtime cache config file {modules.CacheConfigPath} does not exist");
-                    }
+                    logger.LogTrace($"Using {modules.CacheConfigPath} as cache configuration");
+                    cacheConfig = modules.CacheConfigPath;
                 }
 
                 moduleResolver = new Lazy<ModuleResolver>(() =>
@@ -79,112 +95,66 @@
                     LazyThreadSafetyMode.ExecutionAndPublication
                 );
 
-                var defaultHttpRequestLimit = HttpRequestHandler.DefaultHttpRequestLimit;
-                if (modules.MaxHttpRequests > 0 && modules.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
-                {
-                    defaultHttpRequestLimit = modules.MaxHttpRequests;
-                }
+                var defaultHttpRequestLimit = modules.MaxHttpRequests > 0 ? modules.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
 
-                if (modules.Modules == null || modules.Modules.Count == 0)
+                foreach (var module in modules.Modules)
                 {
-                    logger.LogError($"No Module configuration found in section {section}");
-                }
-                else
-                {
-                    foreach (var module in modules.Modules)
+                    var route = module.Key;
+                    if (route.EndsWith("/...", StringComparison.InvariantCulture))
                     {
-                        var name = module.Key;
-                        var route = module.Value.Route;
-                        if (string.IsNullOrEmpty(route))
-                        {
-                            logger.LogError($"Route should not be null or empty Module details {name}");
-                            continue;
-                        }
-
-                        if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))
-                        {
-                            logger.LogError($"Route cannot contain either {{ or }} {route}- skipping");
-                            continue;
-                        }
-
-                        var moduleDetails = module.Value ?? throw new ApplicationException($"Missing module details for module details {name}");
-                        var fileName = moduleDetails.FileName ?? throw new ApplicationException($"Missing module file name for module details {name}");
-                        var moduleFileAndPath = Path.Join(modules.ModulePath, fileName);
-                        if (!File.Exists(moduleFileAndPath))
-                        {
-                            logger.LogError($"Module file {moduleFileAndPath} not found for module details {name} - skipping");
-                            continue;
-                        }
-
-                        var moduleType = fileName.Split('.')[1].ToUpperInvariant();
-                        if (moduleType != "WAT" && moduleType != "WASM")
-                        {
-                            throw new ApplicationException($"Module Filename extension should be either .wat or .wasm Filename: {fileName} Module details {name}");
-                        }
-
-                        if (!File.Exists(moduleFileAndPath))
-                        {
-                            throw new ApplicationException($"File {moduleFileAndPath} not found for Module details {name}");
-                        }
-
-                        var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod, name);
-                        var allowedHosts = new List<Uri>();
-                        if (moduleDetails.AllowedHosts?.Count > 0)
-                        {
-                            foreach (var allowedHost in moduleDetails.AllowedHosts)
-                            {
-                                if (Uri.TryCreate(allowedHost, UriKind.Absolute, out var uri))
-                                {
-                                    allowedHosts.Add(uri);
-                                }
-                                else
-                                {
-                                    logger.LogError($"failed to create Uri for allowed host {allowedHost}  for module details {name}-skipping");
-                                }
-                            }
-                        }
-
-                        var maxHttpRequests = defaultHttpRequestLimit;
-                        if (moduleDetails.MaxHttpRequests > 0 && moduleDetails.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
-                        {
-                            maxHttpRequests = moduleDetails.MaxHttpRequests;
-                        }
-
-                        logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"} Route:{route} Hostnames: {moduleDetails.Hostnames}");
-                        var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
-                        {
-                            await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
-                        });
-
-                        if (moduleDetails.Hostnames != null && moduleDetails.Hostnames.Any())
-                        {
-                            endpointConventionBuilder.RequireHost(moduleDetails.Hostnames.ToArray());
-                        }
-
-                        if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
-                        {
-                            if (moduleDetails.Policies?.Count > 0)
-                            {
-                                endpointConventionBuilder.RequireAuthorization(moduleDetails.Policies.ToArray<string>());
-                            }
-
-                            if (moduleDetails.Roles?.Count > 0)
-                            {
-                                var authData = new AuthorizeAttribute
-                                {
-                                    Roles = string.Join(',', moduleDetails.Roles.ToArray<string>()),
-                                };
-                                endpointConventionBuilder.RequireAuthorization(authData);
-                            }
-                        }
-                        else if (moduleDetails.Authorize)
-                        {
-                            endpointConventionBuilder.RequireAuthorization();
-                        }
-
-                        endpointConventionBuilders.Add(endpointConventionBuilder);
+                        route = $"{route.TrimEnd('.')}{{**path}}";
                     }
+
+                    var moduleDetails = module.Value;
+                    var fileName = moduleDetails.FileName;
+                    var moduleFileAndPath = Path.Join(modules.ModulePath, fileName);
+                    var moduleType = fileName.Split('.')[1].ToUpperInvariant();
+                    var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod);
+                    var allowedHosts = new List<Uri>();
+                    if (moduleDetails.AllowedHosts?.Count > 0)
+                    {
+                        foreach (var allowedHost in moduleDetails.AllowedHosts)
+                        {
+                            allowedHosts.Add(new Uri(allowedHost));
+                        }
+                    }
+
+                    var maxHttpRequests = defaultHttpRequestLimit;
+                    if (moduleDetails.MaxHttpRequests > 0 && moduleDetails.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit)
+                    {
+                        maxHttpRequests = moduleDetails.MaxHttpRequests;
+                    }
+
+                    logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
+                    var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
+                    {
+                        await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
+                    });
+
+                    if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
+                    {
+                        if (moduleDetails.Policies?.Count > 0)
+                        {
+                            endpointConventionBuilder.RequireAuthorization(moduleDetails.Policies.ToArray<string>());
+                        }
+
+                        if (moduleDetails.Roles?.Count > 0)
+                        {
+                            var authData = new AuthorizeAttribute
+                            {
+                                Roles = string.Join(',', moduleDetails.Roles.ToArray<string>()),
+                            };
+                            endpointConventionBuilder.RequireAuthorization(authData);
+                        }
+                    }
+                    else if (moduleDetails.Authorize)
+                    {
+                        endpointConventionBuilder.RequireAuthorization();
+                    }
+
+                    endpointConventionBuilders.Add(endpointConventionBuilder);
                 }
+
             }
 
             return new WagiEndPointConventionBuilder(endpointConventionBuilders);
@@ -196,19 +166,6 @@
             bindleResolver.LoadInvoice().Wait();
         }
 
-        private static string GetHTTPMethod(string httpMethod, string name)
-        {
-            if (!string.IsNullOrEmpty(httpMethod))
-            {
-                if (httpMethod.ToUpperInvariant() != "GET" && httpMethod.ToUpperInvariant() != "POST")
-                {
-                    throw new ApplicationException($"Module HttpMethod should be either GET or POST for Module details {name}");
-                }
-
-                return httpMethod;
-            }
-
-            return "GET";
-        }
+        private static string GetHTTPMethod(string httpMethod) => string.IsNullOrEmpty(httpMethod) ? "GET" : httpMethod;
     }
 }

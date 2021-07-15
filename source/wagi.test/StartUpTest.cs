@@ -47,7 +47,7 @@ namespace Deislabs.WAGI.Test
 
             app.UseEndpoints(endpoints =>
             {
-                var exception = Record.Exception(() => endpoints.MapWASMModules(this.sectionName));
+                var exception = Record.Exception(() => endpoints.MapWASMModules());
                 if (expectException)
                 {
                     Assert.NotNull(exception);
