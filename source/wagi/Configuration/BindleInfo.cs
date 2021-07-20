@@ -10,11 +10,6 @@ namespace Deislabs.WAGI.Configuration
     public class BindleInfo
     {
         /// <summary>
-        /// Gets or sets the Bindle Server URL to get the bindle from
-        /// </summary>
-        public Uri BindleUrl { get; set; }
-
-        /// <summary>
         /// Gets or sets a Bindle Name
         /// </summary>
         public string Name { get; set; }

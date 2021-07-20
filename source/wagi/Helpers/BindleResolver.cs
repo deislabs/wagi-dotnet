@@ -42,8 +42,8 @@ namespace Deislabs.WAGI.Helpers
             {
                 var bindleInfo = bindle.Value;
                 var routePrefix = bindle.Key;
-                logger.LogTrace($"Processing Bindle {bindleInfo.Name} from Server {bindleInfo.BindleUrl} with route prefix '{routePrefix}'.");
-                var bindleClient = new BindleClient(bindleInfo.BindleUrl.ToString());
+                logger.LogTrace($"Processing Bindle {bindleInfo.Name} from Server {this.wasmModules.BindleServer} with route prefix '{routePrefix}'.");
+                var bindleClient = new BindleClient(this.wasmModules.BindleServer);
                 var invoice = await bindleClient.GetInvoice(bindleInfo.Name);
                 var parcels = invoice.Parcels.Where(p => p.Label.MediaType == "application/wasm" && p.Conditions.MemberOf.Count == 0);
                 foreach (var parcel in parcels)
@@ -61,7 +61,7 @@ namespace Deislabs.WAGI.Helpers
                     catch (ArgumentException ex)
                     {
                         logger.LogError($"Attempt to add route Failed. : {ex}");
-                        logger.LogError($"Skipping loading {route} for bindle {bindleInfo.Name} from server {bindleInfo.BindleUrl}.");
+                        logger.LogError($"Skipping loading {route} for bindle {bindleInfo.Name} from server {this.wasmModules.BindleServer}.");
                     }
 
                     foreach (var group in parcel.Conditions.Requires)

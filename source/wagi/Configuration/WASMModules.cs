@@ -20,6 +20,12 @@ namespace Deislabs.WAGI.Configuration
         public string ModulePath { get; set; }
 
         /// <summary>
+        /// Gets or sets the Url of the Bindle Server
+        /// </summary>
+        /// <value></value>
+        public string BindleServer { get; set; }
+
+        /// <summary>
         ///  Gets or sets the maximum number of HTTP requests that modules can make - can be overridden per module by setting on WASMModuleDetails.
         /// </summary>
         public int MaxHttpRequests { get; set; }
