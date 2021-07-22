@@ -53,7 +53,7 @@ namespace Deislabs.WAGI.Helpers
                     var routeSuffix = parcel.Label.Feature.ContainsKey("Route") ? parcel.Label.Feature["Route"].Values.FirstOrDefault() : "/";
                     var route = routeSuffix == "/" ? bindleInfo.Route : Path.Join(bindleInfo.Route, routeSuffix);
                     var moduleInfo = await GetModuleInfo(parcel, modulePath, bindleInfo.Environment, bindleInfo.Name, bindleClient, bindleInfo.Hostnames, route);
-                    logger.LogTrace($"Creating route with prefix '{name}' and suffix '{routeSuffix}'.");
+                    logger.LogTrace($"Creating route with prefix '{bindleInfo.Route}' and suffix '{routeSuffix}'.");
                     try
                     {
                         this.wasmModules.Modules.Add(name, moduleInfo);
