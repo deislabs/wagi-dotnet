@@ -20,24 +20,31 @@ namespace Deislabs.WAGI.Test
         private readonly bool expectException = false;
         private readonly Type exceptionType;
         private readonly string exceptionMessage;
+        public IConfiguration Configuration { get; }
 
-        public StartupTest()
+        public StartupTest(IConfiguration configuration, string sectionName = null)
         {
-            this.sectionName = "WASM";
+            this.sectionName = sectionName;
+            this.Configuration = configuration;
         }
-        public StartupTest(string sectionName)
-        {
-            this.sectionName = sectionName ?? "WASM";
-        }
-        public StartupTest(Type exceptionType, string exceptionMessage, string sectionName = "WASM")
+        public StartupTest(IConfiguration configuration, Type exceptionType, string exceptionMessage, string sectionName = null) : this(configuration, sectionName)
         {
             this.expectException = true;
             this.exceptionType = exceptionType;
             this.exceptionMessage = exceptionMessage;
-            this.sectionName = sectionName;
         }
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
+            if (string.IsNullOrEmpty(sectionName))
+            {
+                services.AddWASM(Configuration);
+            }
+            else
+            {
+                services.AddWASM(Configuration, sectionName);
+            }
+
             services.AddRouting();
         }
 
@@ -47,7 +54,7 @@ namespace Deislabs.WAGI.Test
 
             app.UseEndpoints(endpoints =>
             {
-                var exception = Record.Exception(() => endpoints.MapWASMModules());
+                var exception = Record.Exception(() => endpoints.MapWagiModules());
                 if (expectException)
                 {
                     Assert.NotNull(exception);

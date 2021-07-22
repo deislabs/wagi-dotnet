@@ -66,12 +66,12 @@ namespace Deislabs.WAGI.DataSource
 
             });
 
-            var modules = optionsManager.CurrentValue;
+            var wasmConfig = optionsManager.CurrentValue;
             string cacheConfig = null;
-            if (!string.IsNullOrEmpty(modules.CacheConfigPath))
+            if (!string.IsNullOrEmpty(wasmConfig.CacheConfigPath))
             {
-                logger.LogTrace($"Using {modules.CacheConfigPath} as cache configuration");
-                cacheConfig = modules.CacheConfigPath;
+                logger.LogTrace($"Using {wasmConfig.CacheConfigPath} as cache configuration");
+                cacheConfig = wasmConfig.CacheConfigPath;
             }
 
             moduleResolver = new Lazy<ModuleResolver>(() =>
@@ -82,8 +82,21 @@ namespace Deislabs.WAGI.DataSource
                 LazyThreadSafetyMode.ExecutionAndPublication
             );
 
-            this.defaultHttpRequestLimit = modules.MaxHttpRequests > 0 ? modules.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
-            this.endpoints = BuildEndpoints(modules);
+            this.defaultHttpRequestLimit = wasmConfig.MaxHttpRequests > 0 ? wasmConfig.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
+
+            // It is valid to have no modules defined when being used in Hippo.
+            var hasModuleDefinitions = wasmConfig.Modules?.Any() ?? default;
+            var hasBindleDefinitions = wasmConfig.Bindles?.Any() ?? default;
+            if (!hasModuleDefinitions && !hasBindleDefinitions)
+            {
+                logger.LogWarning("No modules found in configuration.");
+                this.endpoints = new();
+            }
+            else
+            {
+                this.endpoints = BuildEndpoints(wasmConfig);
+            }
+
             this.cancellationTokenSource = new CancellationTokenSource();
             this.changeToken = new CancellationChangeToken(this.cancellationTokenSource.Token);
             var taskScheduler = TaskScheduler.Default;
@@ -101,11 +114,11 @@ namespace Deislabs.WAGI.DataSource
                         logger.LogTrace($"Processing Config Change Request: {updateCount}");
 
                         // This is to deal with the fact that the change event fires multiple times for one change. We only care about one (the last one).
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                         moreUpdates = queue.Reader.TryRead(out var updateModules);
                         if (moreUpdates)
                         {
-                            logger.LogTrace("Found another update");
+                            logger.LogTrace("Found another update, will wait for 500 milliseconds to see if it is the last one.");
                             modules = updateModules;
                         }
 
@@ -128,6 +141,7 @@ namespace Deislabs.WAGI.DataSource
         private List<Endpoint> BuildEndpoints(WASMModules modules)
         {
             var endpoints = new List<Endpoint>();
+
             if (modules.Bindles?.Any() ?? default)
             {
                 LoadBindles(modules, this.loggerFactory);
@@ -138,7 +152,8 @@ namespace Deislabs.WAGI.DataSource
             var order = 1;
             foreach (var module in modules.Modules)
             {
-                var route = module.Key;
+                var name = module.Key;
+                var route = module.Value.Route;
                 if (route.EndsWith("/...", StringComparison.InvariantCulture))
                 {
                     route = $"{route.TrimEnd('.')}{{**path}}";
@@ -159,7 +174,8 @@ namespace Deislabs.WAGI.DataSource
                 }
 
                 var maxHttpRequests = (moduleDetails.MaxHttpRequests > 0 && moduleDetails.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit) ? moduleDetails.MaxHttpRequests : defaultHttpRequestLimit;
-                logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
+                var hostnames = moduleDetails?.Hostnames is null ? string.Empty : string.Join(",", moduleDetails.Hostnames);
+                logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"} Route:{route} Hostnames: {hostnames}");
                 var pattern = RoutePatternFactory.Parse(route);
                 var endPointBuilder = new RouteEndpointBuilder(
                     async context =>
@@ -172,6 +188,11 @@ namespace Deislabs.WAGI.DataSource
                 foreach (var convention in this.conventions)
                 {
                     convention(endPointBuilder);
+                }
+
+                if (moduleDetails.Hostnames != null && moduleDetails.Hostnames.Any())
+                {
+                    endPointBuilder.Metadata.Add(new HostAttribute(moduleDetails.Hostnames.ToArray()));
                 }
 
                 if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)

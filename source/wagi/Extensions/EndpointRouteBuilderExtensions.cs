@@ -72,7 +72,7 @@
                 var optionsManager = endpoints.ServiceProvider.GetService<IOptionsMonitor<WASMModules>>();
                 optionsManager.OnChange<WASMModules>((modules) =>
                 {
-                    logger.LogTrace($"Configuration has changed, there are now {modules.Bindles.Count} bindles");
+                    logger.LogTrace($"Configuration has changed");
                 });
 
                 if (modules.Bindles?.Any() ?? default)
@@ -96,6 +96,11 @@
                 );
 
                 var defaultHttpRequestLimit = modules.MaxHttpRequests > 0 ? modules.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
+                var hasModuleDefinitions = modules.Modules?.Any() ?? default;
+                if (!hasModuleDefinitions)
+                {
+                    logger.LogWarning("No module definitions found in configuration. No endpoints will be added.");
+                }
 
                 foreach (var module in modules.Modules)
                 {

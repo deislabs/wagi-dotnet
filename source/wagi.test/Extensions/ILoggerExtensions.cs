@@ -18,6 +18,12 @@ namespace Deislabs.WAGI.Test.Extensions
             return logger;
         }
 
+        public static Mock<ILogger> VerifyLogWarning(this Mock<ILogger> logger, string expectedMessage)
+        {
+            MockExtensions.VerifyLog(logger, expectedMessage, LogLevel.Warning);
+            return logger;
+        }
+
         private static Mock<ILogger> VerifyLog(Mock<ILogger> logger, string expectedMessage, LogLevel logLevel)
         {
             Func<object, Type, bool> state = (v, t) => v.ToString().CompareTo(expectedMessage) == 0;
