@@ -41,10 +41,12 @@ The configuration for this is example can be found in the [appsettings.Developme
     "ModulePath": "modules",
     // A dictionary of one or more modules to be exposed by the application
     "Modules": {
-      // The path at which to expose the module
-      "/hellowat": {
+    // The logical name of the module definition
+      "hellowat": {
         // The file name of the module.
-        "FileName": "hello.wat"
+        "FileName": "hello.wat",
+        // Route that is appended to the url of the server to form the URL to access the module
+        "Route" : "/hellowat"
       }
     }
   }

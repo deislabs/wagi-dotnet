@@ -53,7 +53,7 @@ namespace Deislabs.WAGI.Extensions.Test
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWATConfig.json", mockLoggerFactory);
             await testServer.Host.StartAsync();
-            mockLogger.VerifyLogTrace($"Added Route Endpoint for Route: /hellowat File: testdata/modules{Path.DirectorySeparatorChar}hello.wat Entrypoint: Default");
+            mockLogger.VerifyLogTrace($"Adding Route Endpoint for Module: hellowat File: testdata{Path.DirectorySeparatorChar}modules{Path.DirectorySeparatorChar}hello.wat Entrypoint: Default Route:/hellowat Hostnames: ");
             await testServer.Host.StopAsync();
         }
 
@@ -66,7 +66,7 @@ namespace Deislabs.WAGI.Extensions.Test
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWASMConfig.json", mockLoggerFactory);
             await testServer.Host.StartAsync();
-            mockLogger.VerifyLogTrace($"Added Route Endpoint for Route: /fibonacci File: testdata/modules{Path.DirectorySeparatorChar}fibonacci.wasm Entrypoint: Default");
+            mockLogger.VerifyLogTrace($"Adding Route Endpoint for Module: fibonacci File: testdata{Path.DirectorySeparatorChar}modules{Path.DirectorySeparatorChar}fibonacci.wasm Entrypoint: Default Route:/fibonacci Hostnames: ");
             await testServer.Host.StopAsync();
         }
 
@@ -79,7 +79,8 @@ namespace Deislabs.WAGI.Extensions.Test
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsModuleIsMissingConfig.json", mockLoggerFactory);
             await testServer.Host.StartAsync();
-            mockLogger.VerifyLogError($"Module file testdata/modules{Path.DirectorySeparatorChar}dontexist.wasm not found for route /dontexist - skipping");
+            mockLogger.VerifyLogError($"Module file testdata{Path.DirectorySeparatorChar}modules{Path.DirectorySeparatorChar}dontexist.wasm not found for module details dontexist - skipping");
+
             await testServer.Host.StopAsync();
         }
 
@@ -92,7 +93,7 @@ namespace Deislabs.WAGI.Extensions.Test
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsCustomSectionNameConfig.json", mockLoggerFactory, context => new StartupTest("custom"));
             await testServer.Host.StartAsync();
-            mockLogger.VerifyLogTrace($"Added Route Endpoint for Route: /hellowat File: testdata/modules{Path.DirectorySeparatorChar}hello.wat Entrypoint: Default");
+            mockLogger.VerifyLogTrace($"Adding Route Endpoint for Module: hellowat File: testdata{Path.DirectorySeparatorChar}modules{Path.DirectorySeparatorChar}hello.wat Entrypoint: Default Route:/hellowat Hostnames: ");
             await testServer.Host.StopAsync();
         }
 

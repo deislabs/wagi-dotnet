@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
@@ -14,10 +15,19 @@ namespace BindleSource.Test
         [Fact]
         public async Task TestInvokeVersion110()
         {
-            var client = factory.CreateClient();
+            var baseAddress = new Uri("http://127.0.0.1:5004");
+            var client = factory.CreateDefaultClient(baseAddress);
 
             var response = await client.GetAsync("/1.1.0");
             var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
+            Assert.True(response.IsSuccessStatusCode);
+
+            baseAddress = new Uri("http://127.0.0.1:5005");
+            client = factory.CreateDefaultClient(baseAddress);
+
+            response = await client.GetAsync("/1.1.0");
+            result = await response.Content.ReadAsStringAsync();
             Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
         }
@@ -25,7 +35,8 @@ namespace BindleSource.Test
         [Fact]
         public async Task TestInvokeVersion1()
         {
-            var client = factory.CreateClient();
+            var baseAddress = new Uri("http://127.0.0.1:5003");
+            var client = factory.CreateDefaultClient(baseAddress);
 
             var response = await client.GetAsync("/v1");
             var result = await response.Content.ReadAsStringAsync();

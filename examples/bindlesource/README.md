@@ -80,21 +80,30 @@ Kia ora, world from 1.1.0!
 * Connection #0 to host localhost left intact
 ```
 
-The configuration for this is example can be found in the [appsettings.Development.json](appsettings.Development.json) configuration file:
+The configuration for this example can be found in the [appsettings.Development.json](appsettings.Development.json).
+
+Example Configuration file:
 
 ``` json
   // The name of the configuration section for the WASM route handler, by default this is expected to be called WASM.
   "WASM": {
     // The relative path to the directory where WASM modules defined in this configuration section are to be downloaded to.
     "ModulePath": "modules",
+    // The path to a bindle server containing the bindle definitions.
+    "BindleServer" : "https://bindle.deislabs.io/v1",
     // A dictionary of one or more bindles to be exposed by the application
     "Bindles": {
-      // The path at which to expose the modules contained in the bindle
-      "/": {
+      // The logical name of the module definition
+      "Test": {
         // The Url of the bindleserver.
         "BindleUrl": "https://bindle.deislabs.io/v1",
         // The name of the bindle that contains the modules to be loaded.
-        "Name": "hippos.rocks/helloworld/1.1.0"
+        "Name": "hippos.rocks/helloworld/1.1.0",
+        // Route that is appended to the url of the server to form the URL to access the module
+        "Route" : "/path",
+        // An array of hostnames and ports to serve requests from , this can be used to constrain the endpoints that serve requests if this is not set  then // requests will be served on all endpoints that the application is lsitening on, this value include the port but should not include the scheme.
+        "Hostnames" ["127.0.0.1:5004",
+                    "127.0.0.1:5005"]
       }
     }
   }

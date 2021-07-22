@@ -70,23 +70,25 @@ namespace SimpleHttp.Test
       {{
         ""WASM"": {{
           ""Modules"": {{
-            ""/writeblob"": {{
+            ""Write blob"": {{
               ""Environment"" :{{
                 ""STORAGE_ACCOUNT"":""{this.fixture.AccountName}"",
                 ""STORAGE_MASTER_KEY"" : ""{this.fixture.AccountKey}""
               }},
               ""AllowedHosts"": [
                 ""https://{this.fixture.AccountName}.blob.core.windows.net""
-              ]
+              ],
+              ""Route"" : ""/writeblob"",
             }},
-            ""/readblob"": {{
+            ""Read blob"": {{
               ""Environment"" :{{
                 ""STORAGE_ACCOUNT"":""{this.fixture.AccountName}"",
                 ""STORAGE_MASTER_KEY"" : ""{this.fixture.AccountKey}""
               }},
               ""AllowedHosts"": [
                 ""https://{this.fixture.AccountName}.blob.core.windows.net""
-              ]
+              ],
+              ""Route"" : ""/readblob"",
             }}
           }}
         }}

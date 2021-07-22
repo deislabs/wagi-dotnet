@@ -20,9 +20,8 @@ namespace Deislabs.WAGI.Configuration
         public string ModulePath { get; set; }
 
         /// <summary>
-        /// Gets or sets the Url of the Bindle Server
+        /// Gets or sets the Url of the Bindle Server to use to fetch any Bindles.
         /// </summary>
-        /// <value></value>
         public string BindleServer { get; set; }
 
         /// <summary>
@@ -31,12 +30,12 @@ namespace Deislabs.WAGI.Configuration
         public int MaxHttpRequests { get; set; }
 
         /// <summary>
-        /// Gets or sets details of modules that can be executed via HTTP Requests, the key is the path to make the module available at.
+        /// Gets or sets details of modules that can be executed via HTTP Requests, the key is a logical name for the module.
         /// </summary>
         public Dictionary<string, WASMModuleInfo> Modules { get; set; }
 
         /// <summary>
-        /// Gets or sets details of bindles that contain modules that can be executed via HTTP Requests, the key is the path prefix to make the modules in the bindle available at.
+        /// Gets or sets details of bindles that contain modules that can be executed via HTTP Requests, the key is a logical name for the module.
         /// </summary>
         public Dictionary<string, BindleInfo> Bindles { get; set; }
     }

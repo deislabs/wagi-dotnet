@@ -93,34 +93,41 @@
                 {
                     foreach (var module in modules.Modules)
                     {
-                        var route = module.Key;
+                        var name = module.Key;
+                        var route = module.Value.Route;
+                        if (string.IsNullOrEmpty(route))
+                        {
+                            logger.LogError($"Route should not be null or empty Module details {name}");
+                            continue;
+                        }
+
                         if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))
                         {
                             logger.LogError($"Route cannot contain either {{ or }} {route}- skipping");
                             continue;
                         }
 
-                        var moduleDetails = module.Value ?? throw new ApplicationException($"Missing module details for route {route}");
-                        var fileName = moduleDetails.FileName ?? throw new ApplicationException($"Missing module file name for route {route}");
+                        var moduleDetails = module.Value ?? throw new ApplicationException($"Missing module details for module details {name}");
+                        var fileName = moduleDetails.FileName ?? throw new ApplicationException($"Missing module file name for module details {name}");
                         var moduleFileAndPath = Path.Join(modules.ModulePath, fileName);
                         if (!File.Exists(moduleFileAndPath))
                         {
-                            logger.LogError($"Module file {moduleFileAndPath} not found for route {route} - skipping");
+                            logger.LogError($"Module file {moduleFileAndPath} not found for module details {name} - skipping");
                             continue;
                         }
 
                         var moduleType = fileName.Split('.')[1].ToUpperInvariant();
                         if (moduleType != "WAT" && moduleType != "WASM")
                         {
-                            throw new ApplicationException($"Module Filename extension should be either .wat or .wasm Filename: {fileName} Route:{route}");
+                            throw new ApplicationException($"Module Filename extension should be either .wat or .wasm Filename: {fileName} Module details {name}");
                         }
 
                         if (!File.Exists(moduleFileAndPath))
                         {
-                            throw new ApplicationException($"File {moduleFileAndPath} not found for route {route}");
+                            throw new ApplicationException($"File {moduleFileAndPath} not found for Module details {name}");
                         }
 
-                        var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod, route);
+                        var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod, name);
                         var allowedHosts = new List<Uri>();
                         if (moduleDetails.AllowedHosts?.Count > 0)
                         {
@@ -132,7 +139,7 @@
                                 }
                                 else
                                 {
-                                    logger.LogError($"failed to create Uri for allowed host {allowedHost}  for route {route} -skipping");
+                                    logger.LogError($"failed to create Uri for allowed host {allowedHost}  for module details {name}-skipping");
                                 }
                             }
                         }
@@ -143,11 +150,16 @@
                             maxHttpRequests = moduleDetails.MaxHttpRequests;
                         }
 
-                        logger.LogTrace($"Added Route Endpoint for Route: {route} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"}");
+                        logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"} Route:{route} Hostnames: {moduleDetails.Hostnames}");
                         var endpointConventionBuilder = endpoints.MapMethods(route, new string[] { httpMethod }, async context =>
                         {
                             await context.RunWAGIRequest(moduleFileAndPath, httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
                         });
+
+                        if (moduleDetails.Hostnames != null && moduleDetails.Hostnames.Any())
+                        {
+                            endpointConventionBuilder.RequireHost(moduleDetails.Hostnames.ToArray());
+                        }
 
                         if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
                         {
@@ -184,13 +196,13 @@
             bindleResolver.LoadInvoice().Wait();
         }
 
-        private static string GetHTTPMethod(string httpMethod, string route)
+        private static string GetHTTPMethod(string httpMethod, string name)
         {
             if (!string.IsNullOrEmpty(httpMethod))
             {
                 if (httpMethod.ToUpperInvariant() != "GET" && httpMethod.ToUpperInvariant() != "POST")
                 {
-                    throw new ApplicationException($"Module HttpMethod should be either GET or POST Route:{route}");
+                    throw new ApplicationException($"Module HttpMethod should be either GET or POST for Module details {name}");
                 }
 
                 return httpMethod;
