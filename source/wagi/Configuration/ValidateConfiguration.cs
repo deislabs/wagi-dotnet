@@ -65,7 +65,7 @@ namespace Deislabs.Wagi.Configuration
                         result.AppendLine($"Missing module details for module name {moduleName}");
                     }
 
-                    var route = module.Value.Route ?? "";
+                    var route = module.Value.Route;
                     if (string.IsNullOrEmpty(route))
                     {
                         result.AppendLine($"Route should not be null or empty for module name {moduleName}");
@@ -133,7 +133,7 @@ namespace Deislabs.Wagi.Configuration
                 foreach (var bindle in options.Bindles)
                 {
                     var bindleName = bindle.Key;
-                    var route = bindle.Value.Route ?? "";
+                    var route = bindle.Value.Route;
                     if (string.IsNullOrEmpty(route))
                     {
                         result.AppendLine($"Route should not be null or empty for bindle {bindleName}");
