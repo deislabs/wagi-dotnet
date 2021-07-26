@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Deislabs.WAGI.Configuration
+namespace Deislabs.Wagi.Configuration
 {
     /// <summary>
     /// BindleInfo contains information for modules defined as Bindles.

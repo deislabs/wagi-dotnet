@@ -1,4 +1,4 @@
-#pragma warning disable CA1001
+﻿#pragma warning disable CA1001
 #pragma warning disable CA1812
 #pragma warning disable CA2008
 using System;
@@ -9,9 +9,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Deislabs.WAGI.Configuration;
-using Deislabs.WAGI.Extensions;
-using Deislabs.WAGI.Helpers;
+using Deislabs.Wagi.Configuration;
+using Deislabs.Wagi.Extensions;
+using Deislabs.Wagi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +25,7 @@ using Microsoft.Extensions.Primitives;
 using Wasi.Experimental.Http;
 using Wasmtime;
 
-namespace Deislabs.WAGI.DataSource
+namespace Deislabs.Wagi.DataSource
 {
     internal class WagiEndpointDataSource : EndpointDataSource, IEndpointConventionBuilder
     {
@@ -36,7 +36,7 @@ namespace Deislabs.WAGI.DataSource
         private readonly IHttpClientFactory httpClientFactory;
         private readonly ILogger<WagiEndpointDataSource> logger;
         private readonly ILoggerFactory loggerFactory;
-        private readonly IOptionsMonitor<WASMModules> optionsManager;
+        private readonly IOptionsMonitor<WagiModules> optionsManager;
         private readonly int defaultHttpRequestLimit;
         private static Lazy<ModuleResolver> moduleResolver;
         private const int QueueCapacity = 128;
@@ -49,29 +49,29 @@ namespace Deislabs.WAGI.DataSource
             }
         }
 
-        private readonly Channel<WASMModules> queue;
+        private readonly Channel<WagiModules> queue;
 
-        public WagiEndpointDataSource(ILogger<WagiEndpointDataSource> logger, IHttpClientFactory httpClientFactory, IOptionsMonitor<WASMModules> optionsManager, ILoggerFactory loggerFactory)
+        public WagiEndpointDataSource(ILogger<WagiEndpointDataSource> logger, IHttpClientFactory httpClientFactory, IOptionsMonitor<WagiModules> optionsManager, ILoggerFactory loggerFactory)
         {
             this.httpClientFactory = httpClientFactory;
             this.logger = logger;
             this.loggerFactory = loggerFactory;
             this.optionsManager = optionsManager;
             var options = new BoundedChannelOptions(QueueCapacity) { FullMode = BoundedChannelFullMode.Wait };
-            this.queue = Channel.CreateBounded<WASMModules>(options);
-            this.optionsManager.OnChange<WASMModules>(async modules =>
+            this.queue = Channel.CreateBounded<WagiModules>(options);
+            this.optionsManager.OnChange<WagiModules>(async modules =>
             {
                 logger.LogTrace("Configuration OnChange called.");
                 await queue.Writer.WriteAsync(modules);
 
             });
 
-            var wasmConfig = optionsManager.CurrentValue;
+            var wagiConfig = optionsManager.CurrentValue;
             string cacheConfig = null;
-            if (!string.IsNullOrEmpty(wasmConfig.CacheConfigPath))
+            if (!string.IsNullOrEmpty(wagiConfig.CacheConfigPath))
             {
-                logger.LogTrace($"Using {wasmConfig.CacheConfigPath} as cache configuration");
-                cacheConfig = wasmConfig.CacheConfigPath;
+                logger.LogTrace($"Using {wagiConfig.CacheConfigPath} as cache configuration");
+                cacheConfig = wagiConfig.CacheConfigPath;
             }
 
             moduleResolver = new Lazy<ModuleResolver>(() =>
@@ -82,11 +82,11 @@ namespace Deislabs.WAGI.DataSource
                 LazyThreadSafetyMode.ExecutionAndPublication
             );
 
-            this.defaultHttpRequestLimit = wasmConfig.MaxHttpRequests > 0 ? wasmConfig.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
+            this.defaultHttpRequestLimit = wagiConfig.MaxHttpRequests > 0 ? wagiConfig.MaxHttpRequests : HttpRequestHandler.DefaultHttpRequestLimit;
 
             // It is valid to have no modules defined when being used in Hippo.
-            var hasModuleDefinitions = wasmConfig.Modules?.Any() ?? default;
-            var hasBindleDefinitions = wasmConfig.Bindles?.Any() ?? default;
+            var hasModuleDefinitions = wagiConfig.Modules?.Any() ?? default;
+            var hasBindleDefinitions = wagiConfig.Bindles?.Any() ?? default;
             if (!hasModuleDefinitions && !hasBindleDefinitions)
             {
                 logger.LogWarning("No modules found in configuration.");
@@ -94,7 +94,7 @@ namespace Deislabs.WAGI.DataSource
             }
             else
             {
-                this.endpoints = BuildEndpoints(wasmConfig);
+                this.endpoints = BuildEndpoints(wagiConfig);
             }
 
             this.cancellationTokenSource = new CancellationTokenSource();
@@ -138,7 +138,7 @@ namespace Deislabs.WAGI.DataSource
             tokenSource.Cancel();
         }
 
-        private List<Endpoint> BuildEndpoints(WASMModules modules)
+        private List<Endpoint> BuildEndpoints(WagiModules modules)
         {
             var endpoints = new List<Endpoint>();
 
@@ -235,7 +235,7 @@ namespace Deislabs.WAGI.DataSource
             this.conventions.Add(convention);
         }
 
-        private static void LoadBindles(WASMModules modules, ILoggerFactory loggerFactory)
+        private static void LoadBindles(WagiModules modules, ILoggerFactory loggerFactory)
         {
             var bindleResolver = new BindleResolver(modules, loggerFactory);
             bindleResolver.LoadInvoice().Wait();

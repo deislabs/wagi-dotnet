@@ -1,19 +1,19 @@
-namespace Deislabs.WAGI.Extensions
+namespace Deislabs.Wagi.Extensions
 {
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Deislabs.WAGI.Helpers;
+    using Deislabs.Wagi.Helpers;
     using Microsoft.AspNetCore.Http;
 
     /// <summary>
-    /// HttpContextExtension for running WAGI Requests.
+    /// HttpContextExtension for running Wagi Requests.
     /// </summary>
     public static class HttpContextExtensions
     {
         /// <summary>
-        /// Runs a WAGI Request.
+        /// Runs a Wagi Request.
         /// </summary>
         /// <param name="context">HttpContext for the request.</param>
         /// <param name="wasmFile">The WASM File name.</param>
@@ -27,7 +27,7 @@ namespace Deislabs.WAGI.Extensions
         public static async Task RunWAGIRequest(this HttpContext context, string wasmFile, IHttpClientFactory httpClientFactory, string entryPoint, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
         {
 #pragma warning disable CA1062
-            var wagiHost = new WAGIHost(context, httpClientFactory, entryPoint, wasmFile, moduleResolver, volumes, environment, allowedHosts, maxHttpRequests);
+            var wagiHost = new WagiHost(context, httpClientFactory, entryPoint, wasmFile, moduleResolver, volumes, environment, allowedHosts, maxHttpRequests);
 #pragma warning restore CA1062
             await wagiHost.ProcessRequest();
         }

@@ -2,8 +2,8 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Deislabs.WAGI.Test;
-using Deislabs.WAGI.Test.Extensions;
+using Deislabs.Wagi.Test;
+using Deislabs.Wagi.Test.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
-namespace Deislabs.WAGI.Extensions.Test
+namespace Deislabs.Wagi.Extensions.Test
 {
 
     public class EndpointRouteBuilderExtensionsTest
@@ -59,13 +59,13 @@ namespace Deislabs.WAGI.Extensions.Test
         }
 
         [Fact]
-        public async Task Test_Handles_Configuration_With_WASM_Module()
+        public async Task Test_Handles_Configuration_With_WAGI_Module()
         {
             var mockLogger = new Mock<ILogger>();
 
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
-            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWASMConfig.json", mockLoggerFactory);
+            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWAGIConfig.json", mockLoggerFactory);
             await testServer.Host.StartAsync();
             mockLogger.VerifyLogTrace($"Adding Route Endpoint for Module: fibonacci File: testdata/modules{Path.DirectorySeparatorChar}fibonacci.wasm Entrypoint: Default Route:/fibonacci Hostnames: ");
             await testServer.Host.StopAsync();

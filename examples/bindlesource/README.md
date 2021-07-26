@@ -1,8 +1,8 @@
 # Using Bindle to serve WAGI Modules
 
-This example shows how to use [Bindle](https://github.com/deislabs/bindle) to host Wagi modules and serve them in wagi-dotnet.
+This example shows how to serve WASM WAGI mdoules hosted in [Bindle](https://github.com/deislabs/bindle) from wagi-dotnet.
 
-The example is configured to load three bindles from a bindle server located at `https://bindle.deislabs.io/v1`. Each bindle contains a single WASM module with a single hello world type function.
+The example is configured to load three bindles from a bindle server located at `https://bindle.deislabs.io/v1`. Each bindle contains a single WASM WAGI module with a single hello world type function.
 
 Clone the repo, switch to the examples/bindlesource folder and then run:
 
@@ -85,9 +85,9 @@ The configuration for this example can be found in the [appsettings.Development.
 Example Configuration file:
 
 ``` json
-  // The name of the configuration section for the WASM route handler, by default this is expected to be called WASM.
-  "WASM": {
-    // The relative path to the directory where WASM modules defined in this configuration section are to be downloaded to.
+  // The name of the configuration section for the WAGI route handler, by default this is expected to be called Wagi.
+  "Wagi": {
+    // The relative path to the directory where WAGI modules defined in this configuration section are to be downloaded to.
     "ModulePath": "modules",
     // The path to a bindle server containing the bindle definitions.
     "BindleServer" : "https://bindle.deislabs.io/v1",

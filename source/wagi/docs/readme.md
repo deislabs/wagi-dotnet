@@ -1,6 +1,6 @@
 # WAGI-dotnet
 
-This package provides a configuration driven method to add WASM modules as route endpoints to ASP.Net Core applications using [WAGI](https://github.com/deislabs/wagi#wagi-webassembly-gateway-interface).
+This package provides a configuration driven method to add WASM WAGI modules as route endpoints to ASP.Net Core applications using [WAGI](https://github.com/deislabs/wagi#wagi-webassembly-gateway-interface).
 
 _WAGI is the easiest way to get started doing cloud-side WASM web apps._
 

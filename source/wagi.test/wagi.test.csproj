@@ -36,4 +36,24 @@
     </Content>
   </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="testdata\appsettingsCustomSectionNameConfig.json" />
+      <None Remove="testdata\appsettingsEmptyConfig.json" />
+      <None Remove="testdata\appsettingsModuleIsMissingConfig.json" />
+      <None Remove="testdata\appsettingsModulesDirectoryDoesNotExistsConfig.json" />
+      <None Remove="testdata\appsettingsNoConfig.json" />
+      <None Remove="testdata\appsettingsWAGIConfig.json" />
+      <None Remove="testdata\appsettingsWATConfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <CodeAnalysisDictionary Include="testdata\appsettingsCustomSectionNameConfig.json" />
+      <Content Include="testdata\appsettingsEmptyConfig.json" />
+      <Content Include="testdata\appsettingsModuleIsMissingConfig.json" />
+      <Content Include="testdata\appsettingsModulesDirectoryDoesNotExistsConfig.json" />
+      <Content Include="testdata\appsettingsNoConfig.json" />
+      <Content Include="testdata\appsettingsWAGIConfig.json" />
+      <Content Include="testdata\appsettingsWATConfig.json" />
+    </ItemGroup>
+
 </Project>

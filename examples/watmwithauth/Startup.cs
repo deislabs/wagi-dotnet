@@ -1,5 +1,5 @@
-using System.Security.Claims;
-using Deislabs.WAGI.Extensions;
+﻿using System.Security.Claims;
+using Deislabs.Wagi.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +22,7 @@ namespace Watmwithauth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient();
-            services.AddWASM(Configuration);
+            services.AddWagi(Configuration);
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
               .AddCookie(options =>
               {

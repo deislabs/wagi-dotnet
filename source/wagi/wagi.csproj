@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Simon Davies</Authors>
     <Company>Microsoft</Company>
-    <Description>Provides a configuration driven method to add WASM modules as route endpoints to ASP.Net Core applications using WAGI.WARNING: WAGI is experimental. It is not considered production-grade by its developers, neither is it "supported" software..</Description>
+    <Description>Provides a configuration driven method to add WAGI modules as route endpoints to ASP.Net Core applications using WAGI.WARNING: WAGI is experimental. It is not considered production-grade by its developers, neither is it "supported" software..</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Deislabs.WAGI</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,7 +13,7 @@
     <PackageTags>WASM;WAGI;WASI;Wasmtime;WebAssembly;</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <RootNamespace>Deislabs.WAGI</RootNamespace>
+    <RootNamespace>Deislabs.Wagi</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <TargetFramework>net5.0</TargetFramework>

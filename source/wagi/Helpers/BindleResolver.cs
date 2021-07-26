@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -6,17 +6,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Deislabs.Bindle;
-using Deislabs.WAGI.Configuration;
+using Deislabs.Wagi.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Deislabs.WAGI.Helpers
+namespace Deislabs.Wagi.Helpers
 {
     /// <summary>
     /// Provides support for resolving a bindle URL into a module confguration
     /// </summary>
     public class BindleResolver
     {
-        private readonly WASMModules wasmModules;
+        private readonly WagiModules wagiModules;
         private readonly ILogger logger;
 
         private static string CachePath => Path.Combine(Directory.GetCurrentDirectory(), "bindlecache");
@@ -24,13 +24,13 @@ namespace Deislabs.WAGI.Helpers
         /// <summary>
         /// Initializes a new instance of the <see cref="BindleResolver"/> class.
         /// </summary>
-        /// <param name="wasmModules">The WASM Module configuration</param>
+        /// <param name="wagiModules">The WAGI Module configuration</param>
         /// <param name="loggerFactory">LoggerFactory for creating ILogger. </param>
-        public BindleResolver(WASMModules wasmModules, ILoggerFactory loggerFactory)
+        public BindleResolver(WagiModules wagiModules, ILoggerFactory loggerFactory)
         {
-            this.wasmModules = wasmModules;
+            this.wagiModules = wagiModules;
             this.logger = loggerFactory?.CreateLogger(typeof(BindleResolver).FullName);
-            this.wasmModules.Modules ??= new();
+            this.wagiModules.Modules ??= new();
         }
 
         /// <summary>
@@ -38,30 +38,30 @@ namespace Deislabs.WAGI.Helpers
         /// </summary>
         public async Task LoadInvoice()
         {
-            foreach (var bindle in this.wasmModules.Bindles)
+            foreach (var bindle in this.wagiModules.Bindles)
             {
                 var bindleInfo = bindle.Value;
                 var name = bindle.Key;
-                logger.LogTrace($"Processing Bindle {bindleInfo.Name} from Server {this.wasmModules.BindleServer} with name '{name}'.");
-                var bindleClient = new BindleClient(this.wasmModules.BindleServer);
+                logger.LogTrace($"Processing Bindle {bindleInfo.Name} from Server {this.wagiModules.BindleServer} with name '{name}'.");
+                var bindleClient = new BindleClient(this.wagiModules.BindleServer);
                 var invoice = await bindleClient.GetInvoice(bindleInfo.Name);
                 var parcels = invoice.Parcels.Where(p => p.Label.MediaType == "application/wasm" && p.Conditions.MemberOf.Count == 0);
                 foreach (var parcel in parcels)
                 {
                     logger.LogTrace($"Processing Parcel {parcel.Label.Name} with SHA256 {parcel.Label.Sha256}.");
-                    var modulePath = GetAssetCacheDirectory(this.wasmModules.ModulePath, parcel.Label.Sha256);
+                    var modulePath = GetAssetCacheDirectory(this.wagiModules.ModulePath, parcel.Label.Sha256);
                     var routeSuffix = parcel.Label.Feature.ContainsKey("Route") ? parcel.Label.Feature["Route"].Values.FirstOrDefault() : "/";
                     var route = routeSuffix == "/" ? bindleInfo.Route : Path.Join(bindleInfo.Route, routeSuffix);
                     var moduleInfo = await GetModuleInfo(parcel, modulePath, bindleInfo.Environment, bindleInfo.Name, bindleClient, bindleInfo.Hostnames, route);
                     logger.LogTrace($"Creating route with prefix '{bindleInfo.Route}' and suffix '{routeSuffix}'.");
                     try
                     {
-                        this.wasmModules.Modules.Add(name, moduleInfo);
+                        this.wagiModules.Modules.Add(name, moduleInfo);
                     }
                     catch (ArgumentException ex)
                     {
                         logger.LogError($"Attempt to add module Failed. : {ex}");
-                        logger.LogError($"Skipping loading {name} for bindle {bindleInfo.Name} from server {this.wasmModules.BindleServer}.");
+                        logger.LogError($"Skipping loading {name} for bindle {bindleInfo.Name} from server {this.wagiModules.BindleServer}.");
                     }
 
                     foreach (var group in parcel.Conditions.Requires)
@@ -92,7 +92,7 @@ namespace Deislabs.WAGI.Helpers
 
         }
 
-        private async Task<WASMModuleInfo> GetModuleInfo(Parcel parcel, string modulePath, Dictionary<string, string> env, string bindleName, BindleClient bindleClient, Collection<string> hostnames, string route)
+        private async Task<WagiModuleInfo> GetModuleInfo(Parcel parcel, string modulePath, Dictionary<string, string> env, string bindleName, BindleClient bindleClient, Collection<string> hostnames, string route)
         {
             var label = parcel.Label;
             await GetParcelAsset(modulePath, label.Sha256, label.Name, bindleName, bindleClient);

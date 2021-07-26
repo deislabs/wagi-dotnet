@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Test.Extensions
+namespace Deislabs.Wagi.Test.Extensions
 {
     using System;
     using Microsoft.Extensions.Logging;

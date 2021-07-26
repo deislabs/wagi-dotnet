@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -28,7 +28,7 @@ namespace SimpleHttp.Test
             this.AccountKey = Environment.GetEnvironmentVariable(SimplehttpTestFixture.TestStorageAccountKeyEnvVar);
             // TODO: create the container if not existing
             this.ContainerName = "wagitest";
-            this.TestPostData = "Hello from wagi-experimental-http";
+            this.TestPostData = "Hello from wasi-experimental-http";
 
         }
     }
@@ -68,7 +68,7 @@ namespace SimpleHttp.Test
         {
             var configData = $@"
       {{
-        ""WASM"": {{
+        ""Wagi"": {{
           ""Modules"": {{
             ""Write blob"": {{
               ""Environment"" :{{

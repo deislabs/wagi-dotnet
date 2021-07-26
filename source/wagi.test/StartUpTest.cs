@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Deislabs.WAGI.Extensions;
+using Deislabs.Wagi.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Deislabs.WAGI.Test
+namespace Deislabs.Wagi.Test
 {
     public class StartupTest
     {
@@ -38,11 +38,11 @@ namespace Deislabs.WAGI.Test
             services.AddHttpClient();
             if (string.IsNullOrEmpty(sectionName))
             {
-                services.AddWASM(Configuration);
+                services.AddWagi(Configuration);
             }
             else
             {
-                services.AddWASM(Configuration, sectionName);
+                services.AddWagi(Configuration, sectionName);
             }
 
             services.AddRouting();

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,18 +6,18 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Wasi.Experimental.Http;
 
-namespace Deislabs.WAGI.Configuration
+namespace Deislabs.Wagi.Configuration
 {
     /// <summary>
-    /// Validates configuration for WAGI dotnet
+    /// Validates configuration for Wagi dotnet
     /// </summary>
-    public class ValidateConfiguration : IValidateOptions<WASMModules>
+    public class ValidateConfiguration : IValidateOptions<WagiModules>
     {
         private Dictionary<string, List<string>> routeToHosts;
         private List<string> paths;
 
         /// <inheritdoc/>
-        public ValidateOptionsResult Validate(string name, WASMModules options)
+        public ValidateOptionsResult Validate(string name, WagiModules options)
         {
             _ = options ?? throw new ArgumentException("Options should not be Null");
             this.routeToHosts = new();

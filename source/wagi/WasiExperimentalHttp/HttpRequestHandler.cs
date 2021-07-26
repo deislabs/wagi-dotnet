@@ -65,8 +65,6 @@
             linker.Define(ModuleName, "headers_get_all", Function.FromCallback<Caller, int, int, int, int, int>(store, this.GetAllHeaders));
         }
 
-#pragma warning disable CS1591
-#pragma warning disable SA1600
         public void Dispose()
         {
             this.Dispose(true);
@@ -85,8 +83,6 @@
             }
         }
 
-#pragma warning restore CS1591
-#pragma warning restore SA1600
         private static Memory GetMemory(Caller caller)
         {
             var memory = caller.GetMemory(MemoryName);

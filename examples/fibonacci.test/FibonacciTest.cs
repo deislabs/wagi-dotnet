@@ -12,7 +12,7 @@ namespace Fibonacci.Test
             factory = new WebApplicationFactory<Startup>();
         }
         [Fact]
-        public async Task TestInvokeWASM()
+        public async Task TestInvokeWagi()
         {
             var client = factory.CreateClient();
 

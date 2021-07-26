@@ -35,9 +35,9 @@ fib(93)=12200160415121876738
 The configuration for this is example can be found in the [appsettings.Development.json](appsettings.Development.json) configuration file:
 
 ``` json
-  // The name of the configuration section for the WASM route handler, by default this is expected to be called WASM.
-  "WASM": {
-    // The relative path to the directory where WASM modules defined in this configuration section are located.
+  // The name of the configuration section for the WAGI route handler, by default this is expected to be called Wagi.
+  "Wagi": {
+    // The relative path to the directory where WAGI modules defined in this configuration section are located.
     "ModulePath": "modules",
     // A dictionary of one or more modules to be exposed by the application
     "Modules": {

@@ -47,7 +47,7 @@ The Azure blob example requires an [Azure account] (https://azure.microsoft.com/
 To create blobs in the Azure Storage service configure the WAGI Modules with details of the [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal) to read and write to, modify [appsettings.Development.json](appsettings.Development.json) as follows:
 
 ```
- "WASM": {
+ "Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Write blob": {
@@ -58,7 +58,7 @@ To create blobs in the Azure Storage service configure the WAGI Modules with det
           "STORAGE_MASTER_KEY" : "" // STORAGE_MASTER_KEY should be set to one of the Azure storage account keys
         },
         "AllowedHosts": [
-          "https://<storage_account>.blob.core.windows.net" // replace <storage_account> with the storage account name
+          "https://YOUR_STORAGE_ACCOUNT.blob.core.windows.net" // replace YOUR_STORAGE_ACCOUNT with the storage account name
         ],
         "HttpMethod": "post",
         "Route" : "/writeblob"
@@ -71,7 +71,7 @@ To create blobs in the Azure Storage service configure the WAGI Modules with det
           "STORAGE_MASTER_KEY" : "" // STORAGE_MASTER_KEY should be set to one of the Azure storage account keys
         },
         "AllowedHosts": [
-          "https://<storage_account>.blob.core.windows.net" // replace <storage_account> with the storage 
+          "https://YOUR_STORAGE_ACCOUNT.blob.core.windows.net" // replace YOUR_STORAGE_ACCOUNT with the storage 
         ],
         "Route" : "/readblob"
       }

@@ -1,4 +1,4 @@
-using Deislabs.WAGI.Extensions;
+﻿using Deislabs.Wagi.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +21,7 @@ namespace Fibonacci
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient();
-            services.AddWASM(Configuration);
+            services.AddWagi(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
