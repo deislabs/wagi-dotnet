@@ -1,4 +1,4 @@
-﻿namespace Deislabs.WAGI.Helpers
+﻿namespace Deislabs.Wagi.Helpers
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
-    using Deislabs.WAGI.Extensions;
+    using Deislabs.Wagi.Extensions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.Routing;
@@ -22,12 +22,12 @@
     using static System.Net.WebUtility;
 
     /// <summary>
-    /// WAGIHost runs WAGI Modules.
+    /// WagiHost runs Wagi Modules.
     /// </summary>
-    internal class WAGIHost
+    internal class WagiHost
     {
         private const string Version = "CGI/1.1";
-        private const string ServerVersion = "WAGI/1";
+        private const string ServerVersion = "Wagi/1";
         private readonly HttpContext context;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
@@ -42,7 +42,7 @@
         private readonly int maxHttpRequests;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WAGIHost"/> class.
+        /// Initializes a new instance of the <see cref="WagiHost"/> class.
         /// </summary>
         /// <param name="context">HttpContext for the request.</param>
         /// <param name="httpClientFactory">IHttpClientFactory to be used for module Http Requests. </param>
@@ -53,13 +53,13 @@
         /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
         /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
         /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
-        public WAGIHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
+        public WagiHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
         {
             this.context = context;
             this.httpClientFactory = httpClientFactory;
             var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
             this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory.CreateLogger(typeof(WAGIHost).FullName);
+            this.logger = loggerFactory.CreateLogger(typeof(WagiHost).FullName);
             this.entryPoint = entryPoint ?? "_start";
             this.volumes = volumes;
             this.wasmFile = wasmFile;
@@ -70,7 +70,7 @@
         }
 
         /// <summary>
-        /// Processes a WAGI Request.
+        /// Processes a Wagi Request.
         /// </summary>
         public async Task ProcessRequest()
         {
@@ -85,7 +85,7 @@
             store.SetWasiConfiguration(config);
             linker.DefineWasi();
 
-            var module = this.moduleResolver.GetWASMModule(this.wasmFile);
+            var module = this.moduleResolver.GetWasmModule(this.wasmFile);
             _ = module.Exports.ToList<Export>().SingleOrDefault(f => (f.Name == this.entryPoint && f is FunctionExport)) ?? throw new ArgumentException("function", $"function {this.entryPoint} is not exported by {this.wasmFile}");
             using var httpRequestHandler = this.GetHttpRequestHandler(linker, store);
             {
@@ -229,6 +229,7 @@
 
         private async Task ProcessOutput(string outputPath)
         {
+
             var headers = new List<string>();
             var responseBuilder = new StringBuilder();
             var sufficientResponse = false;

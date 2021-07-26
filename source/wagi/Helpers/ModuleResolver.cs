@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Helpers
+namespace Deislabs.Wagi.Helpers
 {
     using System;
     using System.Collections.Concurrent;
@@ -35,7 +35,7 @@ namespace Deislabs.WAGI.Helpers
         /// </summary>
         /// <param name="fileName">The wasm module filename.</param>
         /// <returns>The wasmtime Module.</returns>
-        public Module GetWASMModule(string fileName)
+        public Module GetWasmModule(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
             {

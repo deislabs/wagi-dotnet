@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Helpers
+﻿namespace Deislabs.Wagi.Helpers
 {
     using System;
     using System.IO;
@@ -35,7 +35,6 @@ namespace Deislabs.WAGI.Helpers
         public string Path { get; private set; }
 
 #pragma warning disable CS1591
-#pragma warning disable SA1600
         public void Dispose()
         {
             this.Dispose(true);
@@ -63,5 +62,4 @@ namespace Deislabs.WAGI.Helpers
         }
     }
 #pragma warning restore CS1591
-#pragma warning restore SA1600
 }

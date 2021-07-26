@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Extensions
+namespace Deislabs.Wagi.Extensions
 {
     using System;
     using System.Collections.Generic;

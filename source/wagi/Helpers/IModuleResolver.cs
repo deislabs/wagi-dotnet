@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Helpers
+﻿namespace Deislabs.Wagi.Helpers
 {
     using Wasmtime;
 
@@ -18,6 +18,6 @@ namespace Deislabs.WAGI.Helpers
         /// </summary>
         /// <param name="fileName">The WASM File name.</param>
         /// <returns>A WASM Module.</returns>
-        public Module GetWASMModule(string fileName);
+        public Module GetWasmModule(string fileName);
     }
 }

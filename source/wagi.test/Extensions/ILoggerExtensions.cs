@@ -1,4 +1,4 @@
-namespace Deislabs.WAGI.Test.Extensions
+namespace Deislabs.Wagi.Test.Extensions
 {
     using System;
     using Microsoft.Extensions.Logging;
@@ -15,6 +15,12 @@ namespace Deislabs.WAGI.Test.Extensions
         public static Mock<ILogger> VerifyLogTrace(this Mock<ILogger> logger, string expectedMessage)
         {
             MockExtensions.VerifyLog(logger, expectedMessage, LogLevel.Trace);
+            return logger;
+        }
+
+        public static Mock<ILogger> VerifyLogWarning(this Mock<ILogger> logger, string expectedMessage)
+        {
+            MockExtensions.VerifyLog(logger, expectedMessage, LogLevel.Warning);
             return logger;
         }
 

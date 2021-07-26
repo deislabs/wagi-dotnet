@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Deislabs.WAGI.Extensions;
+﻿using System.Security.Claims;
+using Deislabs.Wagi.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,12 +12,17 @@ namespace Watmwithauth
 {
     public class Startup
     {
-        public Startup()
+        public Startup(IConfiguration configuration)
         {
+            Configuration = configuration;
         }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
+            services.AddWagi(Configuration);
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
               .AddCookie(options =>
               {
@@ -63,7 +63,7 @@ namespace Watmwithauth
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Login}");
-                endpoints.MapWASMModules();
+                endpoints.MapWagiModules();
             });
         }
     }

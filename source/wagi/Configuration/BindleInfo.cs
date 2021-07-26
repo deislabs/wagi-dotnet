@@ -1,8 +1,9 @@
+#pragma warning disable CA1056
 #pragma warning disable CA2227
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Deislabs.WAGI.Configuration
+namespace Deislabs.Wagi.Configuration
 {
     /// <summary>
     /// BindleInfo contains information for modules defined as Bindles.
@@ -31,3 +32,4 @@ namespace Deislabs.WAGI.Configuration
     }
 }
 #pragma warning restore CA2227
+#pragma warning restore CA1056

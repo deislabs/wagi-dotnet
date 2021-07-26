@@ -5,31 +5,33 @@ VisualStudioVersion = 16.6.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source", "source", "{BCE00700-705C-4B3A-902B-3356DCD3DA3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wagi", "source\wagi\wagi.csproj", "{5912B3A0-FB51-4088-8B46-B69FB8F18CDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wagi", "source\wagi\wagi.csproj", "{5912B3A0-FB51-4088-8B46-B69FB8F18CDF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fibonacci.test", "examples\fibonacci.test\fibonacci.test.csproj", "{69B6A768-B7DB-4FAD-A184-064143CC09D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fibonacci.test", "examples\fibonacci.test\fibonacci.test.csproj", "{69B6A768-B7DB-4FAD-A184-064143CC09D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "watm.test", "examples\watm.test\watm.test.csproj", "{975AB4A0-7756-44A6-B5BD-F69D42D8691B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "watm.test", "examples\watm.test\watm.test.csproj", "{975AB4A0-7756-44A6-B5BD-F69D42D8691B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wagi.test", "source\wagi.test\wagi.test.csproj", "{E6BF6BD3-4116-48CD-BAC8-D88A26408583}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wagi.test", "source\wagi.test\wagi.test.csproj", "{E6BF6BD3-4116-48CD-BAC8-D88A26408583}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "watmwithauth.test", "examples\watmwithauth.test\watmwithauth.test.csproj", "{17D92F3C-AFB3-4AB7-9753-4557BA4CCECA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "watmwithauth.test", "examples\watmwithauth.test\watmwithauth.test.csproj", "{17D92F3C-AFB3-4AB7-9753-4557BA4CCECA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simplehttp.test", "examples\simplehttp.test\simplehttp.test.csproj", "{0E88D1C4-11D9-4440-9E1C-43124FC6CF6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "simplehttp.test", "examples\simplehttp.test\simplehttp.test.csproj", "{0E88D1C4-11D9-4440-9E1C-43124FC6CF6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simplehttp", "examples\simplehttp\simplehttp.csproj", "{C90D35E5-7B1C-4A04-A1E0-2E0FF889B3DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "simplehttp", "examples\simplehttp\simplehttp.csproj", "{C90D35E5-7B1C-4A04-A1E0-2E0FF889B3DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fibonacci", "examples\fibonacci\fibonacci.csproj", "{9ACC9087-070A-496A-86C0-3314808B457B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fibonacci", "examples\fibonacci\fibonacci.csproj", "{9ACC9087-070A-496A-86C0-3314808B457B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "watm", "examples\watm\watm.csproj", "{5B1E622C-BF3E-48DC-B7F1-B95174CB05DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "watm", "examples\watm\watm.csproj", "{5B1E622C-BF3E-48DC-B7F1-B95174CB05DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "watmwithauth", "examples\watmwithauth\watmwithauth.csproj", "{A73B92C5-AF36-45AA-8EB9-9417D69ACB29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "watmwithauth", "examples\watmwithauth\watmwithauth.csproj", "{A73B92C5-AF36-45AA-8EB9-9417D69ACB29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bindlesource", "examples\bindlesource\bindlesource.csproj", "{4069A7F9-CBA9-4B1D-9F37-893FBF7BB47C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bindlesource", "examples\bindlesource\bindlesource.csproj", "{4069A7F9-CBA9-4B1D-9F37-893FBF7BB47C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bindlesource.test", "examples\bindlesource.test\bindlesource.test.csproj", "{967FB617-BE53-472E-9990-D0A191042DA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bindlesource.test", "examples\bindlesource.test\bindlesource.test.csproj", "{967FB617-BE53-472E-9990-D0A191042DA9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wildcard", "examples\wildcard\wildcard.csproj", "{399879F4-07B6-4BFD-8AEC-6A067C376D81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +41,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5912B3A0-FB51-4088-8B46-B69FB8F18CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -188,6 +187,21 @@ Global
 		{967FB617-BE53-472E-9990-D0A191042DA9}.Release|x64.Build.0 = Release|Any CPU
 		{967FB617-BE53-472E-9990-D0A191042DA9}.Release|x86.ActiveCfg = Release|Any CPU
 		{967FB617-BE53-472E-9990-D0A191042DA9}.Release|x86.Build.0 = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|x64.Build.0 = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Debug|x86.Build.0 = Debug|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x64.ActiveCfg = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x64.Build.0 = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x86.ActiveCfg = Release|Any CPU
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5912B3A0-FB51-4088-8B46-B69FB8F18CDF} = {BCE00700-705C-4B3A-902B-3356DCD3DA3E}
@@ -202,5 +216,9 @@ Global
 		{A73B92C5-AF36-45AA-8EB9-9417D69ACB29} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{4069A7F9-CBA9-4B1D-9F37-893FBF7BB47C} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{967FB617-BE53-472E-9990-D0A191042DA9} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
+		{399879F4-07B6-4BFD-8AEC-6A067C376D81} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3DF3895D-74E4-4CEC-8C19-CF93A06D9F0A}
 	EndGlobalSection
 EndGlobal

@@ -1,13 +1,13 @@
-#pragma warning disable CA2227
-namespace Deislabs.WAGI.Configuration
+﻿#pragma warning disable CA2227
+namespace Deislabs.Wagi.Configuration
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
     /// <summary>
-    /// This class contains configuration for properties for an exposed WASM function.
+    /// This class contains configuration for properties for an exposed WASM WAGI function.
     /// </summary>
-    public class WASMModuleInfo
+    public class WagiModuleInfo
     {
         /// <summary>
         /// Gets or sets the route that is appended to the url of the server to form the endpoint URL

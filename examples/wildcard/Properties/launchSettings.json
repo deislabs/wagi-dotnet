@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "watmwithauth": {
+    "wildcard": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
