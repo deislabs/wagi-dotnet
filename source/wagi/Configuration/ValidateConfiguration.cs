@@ -69,6 +69,7 @@ namespace Deislabs.Wagi.Configuration
                     if (string.IsNullOrEmpty(route))
                     {
                         result.AppendLine($"Route should not be null or empty for module name {moduleName}");
+                        return ValidateOptionsResult.Fail(result.ToString());
                     }
 
                     if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))
@@ -137,6 +138,7 @@ namespace Deislabs.Wagi.Configuration
                     if (string.IsNullOrEmpty(route))
                     {
                         result.AppendLine($"Route should not be null or empty for bindle {bindleName}");
+                        return ValidateOptionsResult.Fail(result.ToString());
                     }
 
                     if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))

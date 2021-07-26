@@ -52,6 +52,7 @@
       <Content Include="testdata\appsettingsModuleIsMissingConfig.json" />
       <Content Include="testdata\appsettingsModulesDirectoryDoesNotExistsConfig.json" />
       <Content Include="testdata\appsettingsNoConfig.json" />
+      <Content Include="testdata\appsettingsRouteIsMissingConfig.json" />
       <Content Include="testdata\appsettingsWAGIConfig.json" />
       <Content Include="testdata\appsettingsWATConfig.json" />
     </ItemGroup>

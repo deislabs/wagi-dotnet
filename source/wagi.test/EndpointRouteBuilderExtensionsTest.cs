@@ -23,7 +23,6 @@ namespace Deislabs.Wagi.Extensions.Test
         public async Task Test_Handles_No_Configuration_As_Log_Warning()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsNoConfig.json", mockLoggerFactory);
@@ -36,7 +35,6 @@ namespace Deislabs.Wagi.Extensions.Test
         public async Task Test_Handles_Configuration_With_Empty_Config()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsEmptyConfig.json", mockLoggerFactory);
@@ -49,7 +47,6 @@ namespace Deislabs.Wagi.Extensions.Test
         public async Task Test_Handles_Configuration_With_WAT_Module()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWATConfig.json", mockLoggerFactory);
@@ -62,7 +59,6 @@ namespace Deislabs.Wagi.Extensions.Test
         public async Task Test_Handles_Configuration_With_WAGI_Module()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsWAGIConfig.json", mockLoggerFactory);
@@ -75,10 +71,19 @@ namespace Deislabs.Wagi.Extensions.Test
         public void Test_Module_Is_Missing()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
-            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsModuleIsMissingConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, typeof(OptionsValidationException), $"Module file testdata/modules{Path.DirectorySeparatorChar}dontexist.wasm not found for module name dontexist\r\n"));
+            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsModuleIsMissingConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, typeof(OptionsValidationException), $"Module file testdata/modules{Path.DirectorySeparatorChar}dontexist.wasm not found for module name dontexist{Environment.NewLine}"));
+            testServer.CreateClient();
+        }
+
+        [Fact]
+        public void Test_Route_Is_Missing()
+        {
+            var mockLogger = new Mock<ILogger>();
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
+            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsRouteIsMissingConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, typeof(OptionsValidationException), $"Route should not be null or empty for module name noroute{Environment.NewLine}"));
             testServer.CreateClient();
         }
 
@@ -86,7 +91,6 @@ namespace Deislabs.Wagi.Extensions.Test
         public async Task Test_Handles_Configuration_With_Custom_Section_Name()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsCustomSectionNameConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, "custom"));
@@ -99,10 +103,9 @@ namespace Deislabs.Wagi.Extensions.Test
         public void Test_Handles_Modules_Directory_Does_Not_Exist()
         {
             var mockLogger = new Mock<ILogger>();
-
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
-            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsModulesDirectoryDoesNotExistsConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, typeof(OptionsValidationException), $"Module Path not found dontexist\r\nModule file dontexist{Path.DirectorySeparatorChar}fibonacci.wasm not found for module name fibonacci\r\n"));
+            var testServer = EndpointRouteBuilderExtensionsTest.CreateTestServer("testdata/appsettingsModulesDirectoryDoesNotExistsConfig.json", mockLoggerFactory, context => new StartupTest(context.Configuration, typeof(OptionsValidationException), $"Module Path not found dontexist{Environment.NewLine}Module file dontexist{Path.DirectorySeparatorChar}fibonacci.wasm not found for module name fibonacci{Environment.NewLine}"));
             testServer.CreateClient();
         }
 
