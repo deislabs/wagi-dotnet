@@ -29,7 +29,7 @@ Notice that there is an error message produced as the extension is not yet confi
 
 ## Configuration
 
-The extension is driven by configuration which can be provided using any [.NET configuration provider](https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration). The following examples assume that a json file is being used.
+The extension is driven by configuration which can be provided using any [dotnet configuration provider](https://docs.microsoft.com/en-us/dotnet/core/extensions/configuration). The following examples assume that a json file is being used.
 
 Example Configuration:
 
@@ -38,8 +38,9 @@ Example Configuration:
     "CacheConfigPath" : "cache.toml"
     "ModulePath": "modules",
     "MaxHttpRequests": 20,
+    "BindleServer" : "https://my.bindle.server/v1",
     "Modules": {
-      "/path": {
+      "MyModule": {
         "FileName": "filename",
         "Entrypoint": "entrypoint",
         "Volumes": {
@@ -48,6 +49,11 @@ Example Configuration:
         "Environment" :{
           "ENVAR_NAME":"VALUE"
         },
+        "Route" : "/path",
+        "Hostnames" : [
+          "127.0.0.1:5004",
+          "127.0.0.1:5005"
+        ],
         "HttpMethod" : "POST",
         "Authorize": true,
         "Roles" :{
@@ -62,27 +68,45 @@ Example Configuration:
         "MaxHttpRequests": 50
       }
     }
+    "Bindles" :{
+      "MyBindle" :{
+        "Name": "example.bindles/myapp/1.0.0",
+          "Route" : "/v1",
+          "Hostnames" : [
+            "127.0.0.1:5003"
+          ]
+      }
+    }
   }
 ```
 
 Configuration for the extension is defined in a configuration section which is named `WASM` by default, any valid name can be used for this section, if you use a non default name then you should pass the section name to the ```MapWASMModules``` extension method.
 
 - Fields
-  - `CacheConfigPath` The path to a wasmtime cache configuration file see [here](#enabling-caching) for details. 
+  - `CacheConfigPath`: The path to a wasmtime cache configuration file see [here](#enabling-caching) for details. 
   - `ModulePath`: The path to the directory on disk where the WASM modules are located.
   - `MaxHttpRequests`: Sets the maximum number of HTTP Requests a module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). This value can be overridden in `ModuleDetails`, if not present defaults to 10, must be a value between 1 and 500.
-  - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a path pattern used to create a route to the module and the value is a Module object. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration.)
+  - `BindleServer`:  The address of the bindle server to be used to resolve any `Bindle` definitions.
+  - `Modules` : Modules is a key value pair object where each item defines a WAGI module to be exposed by the server. The *key* is a logical name for the module and the *value* is a Module object. 
   - Module Object Fields
-    - `filename` (REQUIRED): The path relative to `ModulePath` of the module on the file system, the file should be named either `<name>.wat` for modules in Web Assembly Text format or `<name>.wasm` for binary modules.
-    - `environment`: Key value pairs of strings where the key is an environment variable name and the value is an environment variable value. Each entry respresents an Environment Variables created in the modules environment at runtime.
-    - `entrypoint` (default: `_start`): The name of the function within the module. This will directly execute that function. Most WASM/WASI implementations create a `_start` function by default. An example of a module that declares 3 entrypoints can be found [here](https://github.com/technosophos/hello-wagi).
-    - `volumes`: Key value pairs of strings where the key is an path in the WASM module and the value is a path in the host environment. Each entry respresents a host directory that is made available to the module at runtime.
-    - `httpmethod` (default: `GET`): the HTTP method for requests to be mapped. Can be either GET or POST.
-    - `authorize` (default: `false`): specifies that the module should only be accessible to authenticated users.
-    - `roles` : An array of roles that the user must belong to in order to access the module.
-    - `policies` : An array of policies that the user must satisfy to in order to access the module.
-    - `allowedhosts` : An array of hostnames that a module using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) can make, only hostnames in this array can be accessed by the module.
-    - `maxhttprequests`: Sets the maximum number of HTTP Requests this module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). If not present defaults to `maxhttprequests` specified in `WASM` configuration, must be a value between 1 and 500.
+    - `Route`  (REQUIRED): The route path to expose the module on. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration. Unless the `Hostnames` field is specified.)
+    - `Filename` (REQUIRED): The path relative to `ModulePath` of the module on the file system, the file should be named either `<name>.wat` for modules in Web Assembly Text format or `<name>.wasm` for binary modules.
+    - `Environment`: Key value pairs of strings where the key is an environment variable name and the value is an environment variable value. Each entry respresents an Environment Variables created in the modules environment at runtime.
+    - `Entrypoint` (default: `_start`): The name of the function within the module. This will directly execute that function. Most WASM/WASI implementations create a `_start` function by default. An example of a module that declares 3 entrypoints can be found [here](https://github.com/technosophos/hello-wagi).
+    - `Volumes`: Key value pairs of strings where the key is an path in the WASM module and the value is a path in the host environment. Each entry respresents a host directory that is made available to the module at runtime.
+    - `HttpMethod` (default: `GET`): the HTTP method for requests to be mapped. Can be either GET or POST.
+    - `Hostnames` : A list of hostnames to expose the module on, this can include a port e.g `localhost:8080`. If no hostnames are specified then the module will be mapped to each url endpoint that the server is listening on.
+    - `Authorize` (default: `false`): specifies that the module should only be accessible to authenticated users.
+    - `Roles` : An array of roles that the user must belong to in order to access the module.
+    - `Policies` : An array of policies that the user must satisfy to in order to access the module.
+    - `AllowedHosts` : An array of hostnames that a module using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) can make, only hostnames in this array can be accessed by the module.
+    - `MaxHttpRequests`: Sets the maximum number of HTTP Requests this module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). If not present defaults to `MaxHttpRequests` specified in `WASM` configuration, must be a value between 1 and 500.
+  - `Bindles` : Bindles is a key value pair object where each item defines a [bindle](https://github.com/deislabs/bindle) hosted at `BindleServer`  to be exposed by the server. Like the `Modules` property the *key* is a logical name for the bindle and the *value* is a Bindle Object.
+    - Bindle Object Fields
+      - `Name` (REQUIRED): The Name of the bindle to be loaded from the bindle server.
+      - `Route`  (REQUIRED): The route path to expose the bindle on. The path pattern is applied to each address that the server is listening on (e.g. an item with the key`/path` translates to the `http://localhost:5000/path` and `https://localhost:5001/path` for a default server configuration. Unless the `Hostnames` field is specified.)
+      - `Hostnames` : A list of hostnames to expose the bindle on, this can include a port e.g `localhost:8080`. If no hostnames are specified then the module will be mapped to each url endpoint that the server is listening on.
+      - `Environment`: Key value pairs of strings where the key is an environment variable name and the value is an environment variable value. Each entry respresents an Environment Variable created in the environment at runtime for each module in the bindle.  
 
 Here is a brief example of a configuration file that declares two routes:
 
@@ -90,11 +114,13 @@ Here is a brief example of a configuration file that declares two routes:
  "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/hello": {
-        "FileName": "hello.wasm"
+      "hello": {
+        "FileName": "hello.wasm",
+        "Route": "/hello",
       },
-      "/goodbye": {
-        "FileName": "goodbye.wasm"
+      "goodbye": {
+        "FileName": "goodbye.wasm",
+        "Route": "/goodbye",
       }
     }
   }
@@ -105,20 +131,42 @@ Each key-value pair in the `modules` property of the config is responsible for m
 
 The two required directives for a module section are:
 
-- key: The path-pattern of a URL
-- `filename`: The file name of the WebAssembly module to execute
+- `Route`: The path-pattern of a URL
+- `FileName`: The file name of the WebAssembly module to execute
 
-Routes are paths relative to the addresses that the server is listening on. Assuming the routes above are running on a server whose domain is `example.com`:
+Routes are paths relative to the all the addresses defined in endpoints that the server is listening on. Assuming the routes above are running on a server that has an endpoint defined with the URL of `http://example.com`:
 
-- The `/` path-pattern handles traffic to `http://example.com/` (or `https://example.com/`)
-- A path-pattern like `/hello` would handle traffic to `http://example.com/hello`
+- The `/` `Route` would handle traffic to `http://example.com/` 
+- A `Route` like `/hello` would handle traffic to `http://example.com/hello`
+- A `Route` like `/hello` would handle traffic to `http://example.com/hello`
 
-The `filename` property is the name of a `wasm` or `wat` file on the filesystem. The filename is combined with the value of `ModulePath` and will be resolved from the current working directory in which the application was started.
+The `FileName` property is the name of a `wasm` or `wat` file on the filesystem. The filename is combined with the value of `ModulePath` and will be resolved relative to the current working directory in which the application was started.
+
+Routes can be restricted to a subset of the addresses that the server is listening on by specifying the `Hostnames` property:
+
+```json
+ "WASM": {
+    "ModulePath": "modules",
+    "Modules": {
+      "hello": {
+        "FileName": "hello.wasm",
+        "Route": "/hello",
+        "Hostnames": ["localhost:8080"]
+      },
+      "goodbye": {
+        "FileName": "goodbye.wasm",
+        "Route": "/goodbye",
+      }
+    }
+  }
+
+```
+In this case the `hello` module would only be accessible at the URL http://localhost:8080/hello. (Assuming that the server is listening using HTTP)
 
 ### Volume Mounting
 
 In addition to the required directives, the configurations sections support several other properties.
-One of these is the `volume` property, which specifies one or more host directories to be mounted as a local directory into the module.
+One of these is the `Volume` property, which specifies one or more host directories to be mounted as a local directory into the module.
 
 By default, Wasm modules in WAGI have no ability to access the host filesystem.
 That is, a Wasm module cannot open `/etc/` and read the files there, even if the application server has access to `/etc/`.
@@ -131,8 +179,9 @@ Here is an example of providing a volume:
  "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/path": {
+      "Access Files": {
         "FileName": "bar.wasm",
+        "Route": "/path",
         "Volumes": {
           "/path/inside/wasm":"/path/on/host"
         }
@@ -141,9 +190,9 @@ Here is an example of providing a volume:
   }
 ```
 
-In this case, the `volumes` property tells WAGI to expose the contents of `/path/on/host` to the `bar.wasm` module.
+In this case, the `Volumes` property tells WAGI to expose the contents of `/path/on/host` to the `bar.wasm` module.
 But `bar.wasm` will see that directory as `/path/inside/wasm`. Importantly, it will not be able to access any other parts of the filesystem. For example, it will not see anything on the path `/path/inside`. It _only_ has access to the paths specified
-in the `volumes` property.
+in the `Volumes` property.
 
 #### Environment Variables
 
@@ -154,8 +203,9 @@ However, the environment property provides a way for you to pass in environment 
  "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/path": {
+      "Env Vars Example": {
         "FileName": "hello.wasm",
+        "Route": "/path",
         "Environment" :{
           "TEST_NAME":"test value"
         }
@@ -185,17 +235,20 @@ invoking a different function:
 "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/hello": {
-        "FileName": "bar.wasm"
+      "hello": {
+        "FileName": "bar.wasm",
+        "Route": "/hello",
         // With no `entrypoint`, this will invoke `_start()`
       },
-      "/entrypoint/hello": {
+      "Entrypoint hello": {
         "FileName": "bar.wasm",
+        "Route" : "/entrypoint/hello",
         "Entrypoint": "hello"
         // Executes the `hello()` function in the module (instead of `_start`)
       },
-      "/entrypoint/goodbye": {
+      "Entrypoint Goodbye": {
         "FileName": "bar.wasm",
+        "Route": "/entrypoint/goodbye",
         "Entrypoint": "goodbye"
         // Executes the `goodbye()` function in the module (instead of `_start`)
       }
@@ -213,8 +266,9 @@ The simplest example is to require that a user is authenticated to access the mo
 "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/hellowatauth": {
+      "Hellowat with auth": {
         "FileName": "hello.wat",
+        "Route": "/hellowatauth",
         "Authorize" : true
       }
     }
@@ -229,8 +283,9 @@ It is also possible to require that the logged in user is a member of one or mor
 "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/hellowatrole": {
+      "Hellowat with role": {
         "FileName": "hello.wat",
+        "Route": "/hellowatrole",
         "Roles" : ["admin"]
       },
     }
@@ -245,8 +300,9 @@ It is also possible to require that the logged in user satisfies one or more [po
 "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/hellowatpolicy": {
+      "Hellowat with Policy": {
         "FileName": "hello.wat",
+        "Route": "/hellowatpolicy",
         "Policies" : ["IsASuperAdmin"]
       },
     }
@@ -265,8 +321,9 @@ Modules can make HTTP Requests using the [wasi-experimental-http](https://github
 "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/test": {
+      "Outbound HTTP": {
         "FileName": "optimized.wasm",
+        "Route": "/test",
         "AllowedHosts": [
           "https://postman-echo.com/"
         ],
@@ -304,12 +361,49 @@ Then update the configuration to use it:
     "CacheConfigPath" : "cache.toml",
     "ModulePath": "modules",
     "Modules": {
-      "/test": {
-        "FileName": "test.wasm
+      "Caching": {
+        "FileName": "test.wasm",
+        "Route": "/test",
       }
     }
 }
 ```
+
+## Using Bindle 
+
+To load modules defined as bindle create one or more bindle configuration entries, each entry contains the URL to a Bindle server and the name of the bindle containing the modules to configure:
+
+```
+"WASM": {
+  "ModulePath": "modules",
+  "BindleServer" : "https://some.bindleserver.com/v1",
+  "Bindles": {
+    "My Bindle App": {
+      "Route":"/",
+      "Name": "example.bindles/myapp/1.0.0"
+    }
+  }
+}
+```
+
+In the above example when the `MapWASMModules` extension method is called it will retrieve details of any WASM/WAGI Modules contained in the bindle at the`BindleServer` URL and will download the modules and any associated artefacts, it will then configure modules and routes as defined in the bindle, each route will be a child path of the path in the key for this item.
+
+Simlarly to local modules, bindle modules Routes can be restricted to a subset of the addresses that the server is listening on by specifying the `Hostnames` property:
+
+```json
+"WASM": {
+  "ModulePath": "modules",
+  "BindleServer" : "https://some.bindleserver.com/v1",
+  "Bindles": {
+    "My Bindle App": {
+      "Route":"/",
+      "Name": "example.bindles/myapp/1.0.0",
+      "Hostnames": ["localhost:8080"]
+    }
+  }
+}
+```
+In this case the modules in the bindle would only be accessible at the URL http://localhost:8080/. (Assuming that the server is listening using HTTP)
 
 ## What's Next?
 

@@ -7,8 +7,18 @@ namespace Deislabs.WAGI.Configuration
     /// <summary>
     /// This class contains configuration for properties for an exposed WASM function.
     /// </summary>
-    public class WASMModuleDetails
+    public class WASMModuleInfo
     {
+        /// <summary>
+        /// Gets or sets the route that is appended to the url of the server to form the endpoint URL
+        /// </summary>
+        public string Route { get; set; }
+
+        /// <summary>
+        /// Gets or set the hostnames and ports to serve requests from , this can be used to constrain the endpoints that serve requests if this is not set then requests will be served on all endpoints, this can include the port but should not include the scheme.
+        /// </summary>
+        public Collection<string> Hostnames { get; set; }
+
         /// <summary>
         /// Gets or Sets the Module filename.
         /// </summary>

@@ -41,22 +41,26 @@ The configuration for this is example can be found in the [appsettings.Developme
     "ModulePath": "modules",
     // A dictionary of one or more modules to be exposed by the application
     "Modules": {
-      // The path at which to expose the module
-      "/hellowatauth": {
+      // The logical name of the module definition
+      "hellowatauth": {
          // The file name of the module.
         "FileName": "hello.wat",
         // Setting Authorize to true requires that users are logged in to access the endpoint.
-        "Authorize" : true
+        "Authorize" : true,
+        // Route that is appended to the url of the server to form the URL to access the module
+        "Route" : "/hellowatauth"
       },
-      "/hellowatrole": {
+      "hellowatrole": {
         "FileName": "hello.wat",
          // Setting Roles is a list of role names that the logged in user must be a member of to access the endpoint.
-        "Roles" : ["superadmin"]
+        "Roles" : ["superadmin"],
+        "Route" : "/hellowatrole"
       },
-      "/hellowatpolicy": {
+      "hellowatpolicy": {
         "FileName": "hello.wat",
          // Setting Policies is a list of policy names that the logged in user must satisfy to access the endpoint.
-        "Policies" : ["IsSpecial"]
+        "Policies" : ["IsSpecial"],
+        "Route" : "/hellowatpolicy"
       }
     }
   }

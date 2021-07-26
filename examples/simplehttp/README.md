@@ -50,7 +50,7 @@ To create blobs in the Azure Storage service configure the WAGI Modules with det
  "WASM": {
     "ModulePath": "modules",
     "Modules": {
-      "/writeblob": {
+      "Write blob": {
         "FileName": "blob.wasm",
         "Entrypoint": "writeblob",
         "Environment" :{
@@ -60,9 +60,10 @@ To create blobs in the Azure Storage service configure the WAGI Modules with det
         "AllowedHosts": [
           "https://<storage_account>.blob.core.windows.net" // replace <storage_account> with the storage account name
         ],
-        "HttpMethod": "post"
+        "HttpMethod": "post",
+        "Route" : "/writeblob"
       },
-      "/readblob": {
+      "Read blob": {
         "FileName": "blob.wasm",
         "Entrypoint": "readblob",
         "Environment" :{
@@ -71,7 +72,8 @@ To create blobs in the Azure Storage service configure the WAGI Modules with det
         },
         "AllowedHosts": [
           "https://<storage_account>.blob.core.windows.net" // replace <storage_account> with the storage 
-        ]
+        ],
+        "Route" : "/readblob"
       }
     }
 ```

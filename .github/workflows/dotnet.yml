@@ -65,7 +65,7 @@ jobs:
       working-directory: source/dotnettemplates
       shell: bash
   publish:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
