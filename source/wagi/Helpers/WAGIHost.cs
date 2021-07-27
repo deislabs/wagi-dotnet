@@ -194,6 +194,17 @@
             environmentVariables.Add(("SERVER_PROTOCOL", req.Scheme));
             environmentVariables.Add(("SERVER_SOFTWARE", ServerVersion));
 
+            if (originalRoute.Route.EndsWith("/...", StringComparison.InvariantCulture))
+            {
+                var routePrefix = originalRoute.Route.TrimEnd('.');
+                var xRelativePath = req.Path.Value.Remove(0, routePrefix.Length);
+                environmentVariables.Add(("X_RELATIVE_PATH", xRelativePath));
+            }
+            else
+            {
+                environmentVariables.Add(("X_RELATIVE_PATH", string.Empty));
+            }
+
             foreach (var header in headers)
             {
                 var key = $"HTTP_{header.Key.Replace("-", "_", StringComparison.InvariantCultureIgnoreCase)}";
