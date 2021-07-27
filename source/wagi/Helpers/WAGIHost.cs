@@ -9,6 +9,7 @@
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using Deislabs.Wagi.DataSource;
     using Deislabs.Wagi.Extensions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
@@ -161,7 +162,8 @@
             var environmentVariables = new List<(string, string)>();
             var headers = this.context.Request.Headers;
             var req = this.context.Request;
-            var routeData = this.context.GetRouteData();
+            var endpoint = this.context.GetEndpoint();
+            var originalRoute = this.context.GetEndpoint().Metadata.Where(a => a.GetType() == typeof(WagiRouteAttribute)).FirstOrDefault() as WagiRouteAttribute;
 
             // TODO: implement AUTH_TYPE
             environmentVariables.Add(("AUTH_TYPE", string.Empty));
@@ -174,7 +176,7 @@
             environmentVariables.Add(("CONTENT_TYPE", req.ContentType));
             environmentVariables.Add(("X_FULL_URL", $"{req.Scheme}://{req.Host}{req.Path}{req.QueryString}"));
             environmentVariables.Add(("GATEWAY_INTERFACE", Version));
-            environmentVariables.Add(("X_MATCHED_ROUTE", routeData.Values["key"]?.ToString() ?? string.Empty));
+            environmentVariables.Add(("X_MATCHED_ROUTE", originalRoute?.Route ?? string.Empty));
             environmentVariables.Add(("PATH_INFO", req.Path));
 
             // TODO: implement Path Translated
@@ -186,7 +188,7 @@
             // TODO: set Remote User
             environmentVariables.Add(("REMOTE_USER", string.Empty));
             environmentVariables.Add(("REQUEST_METHOD", req.Method));
-            environmentVariables.Add(("SCRIPT_NAME", routeData.Values["name"]?.ToString() ?? string.Empty));
+            environmentVariables.Add(("SCRIPT_NAME", this.wasmFile));
             environmentVariables.Add(("SERVER_NAME", req.Host.Host));
             environmentVariables.Add(("SERVER_PORT", Convert.ToString(req.Host.Port ?? 80, CultureInfo.InvariantCulture)));
             environmentVariables.Add(("SERVER_PROTOCOL", req.Scheme));

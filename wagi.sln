@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bindlesource.test", "exampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wildcard", "examples\wildcard\wildcard.csproj", "{399879F4-07B6-4BFD-8AEC-6A067C376D81}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wildcard.test", "examples\wildcard.test\wildcard.test.csproj", "{768B1623-DD53-42DD-96FA-FE0729B9CBBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -199,6 +201,18 @@ Global
 		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x64.Build.0 = Release|Any CPU
 		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x86.ActiveCfg = Release|Any CPU
 		{399879F4-07B6-4BFD-8AEC-6A067C376D81}.Release|x86.Build.0 = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|x64.Build.0 = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Debug|x86.Build.0 = Debug|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|x64.ActiveCfg = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|x64.Build.0 = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|x86.ActiveCfg = Release|Any CPU
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -217,6 +231,7 @@ Global
 		{4069A7F9-CBA9-4B1D-9F37-893FBF7BB47C} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{967FB617-BE53-472E-9990-D0A191042DA9} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{399879F4-07B6-4BFD-8AEC-6A067C376D81} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
+		{768B1623-DD53-42DD-96FA-FE0729B9CBBE} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF3895D-74E4-4CEC-8C19-CF93A06D9F0A}

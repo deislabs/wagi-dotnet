@@ -154,9 +154,11 @@ namespace Deislabs.Wagi.DataSource
             {
                 var name = module.Key;
                 var route = module.Value.Route;
+                var originalRoute = module.Value.Route;
                 if (route.EndsWith("/...", StringComparison.InvariantCulture))
                 {
                     route = $"{route.TrimEnd('.')}{{**path}}";
+                    logger.LogTrace($"Mapped Wildcard Route: {originalRoute} to {route}");
                 }
 
                 var moduleDetails = module.Value;
@@ -183,12 +185,15 @@ namespace Deislabs.Wagi.DataSource
                         await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
                     },
                     pattern,
-                    order++);
+                    order);
 
                 foreach (var convention in this.conventions)
                 {
                     convention(endPointBuilder);
                 }
+
+                endPointBuilder.DisplayName = module.Key;
+                endPointBuilder.Metadata.Add(new WagiRouteAttribute(originalRoute));
 
                 if (moduleDetails.Hostnames != null && moduleDetails.Hostnames.Any())
                 {
@@ -242,6 +247,18 @@ namespace Deislabs.Wagi.DataSource
         }
         private static string GetHTTPMethod(string httpMethod) => string.IsNullOrEmpty(httpMethod) ? "GET" : httpMethod;
 
+    }
+    /// <summary>
+    /// WagiRouteAttribute enables route metadata to include the original route specified in the configuration
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1018:Mark attributes with AttributeUsageAttribute", Justification = "Not needed")]
+    sealed class WagiRouteAttribute : Attribute
+    {
+        public string Route { get; private set; }
+        public WagiRouteAttribute(string route)
+        {
+            Route = route;
+        }
     }
 }
 #pragma warning restore CA1001
