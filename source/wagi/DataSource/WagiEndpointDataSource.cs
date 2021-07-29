@@ -29,6 +29,7 @@ namespace Deislabs.Wagi.DataSource
 {
     internal class WagiEndpointDataSource : EndpointDataSource, IEndpointConventionBuilder
     {
+        const string RoutesEntryPoint = "_routes";
         private CancellationTokenSource cancellationTokenSource;
         private IChangeToken changeToken;
         private List<Endpoint> endpoints;
@@ -94,7 +95,7 @@ namespace Deislabs.Wagi.DataSource
             }
             else
             {
-                this.endpoints = BuildEndpoints(wagiConfig);
+                this.endpoints = BuildEndpoints(wagiConfig).Result;
             }
 
             this.cancellationTokenSource = new CancellationTokenSource();
@@ -123,7 +124,7 @@ namespace Deislabs.Wagi.DataSource
                         }
 
                     } while (moreUpdates);
-                    var endpoints = BuildEndpoints(modules);
+                    var endpoints = await BuildEndpoints(modules);
                     UpdateDataAndSignalChange(endpoints);
                 }
             });
@@ -138,97 +139,165 @@ namespace Deislabs.Wagi.DataSource
             tokenSource.Cancel();
         }
 
-        private List<Endpoint> BuildEndpoints(WagiModules modules)
+        private async Task<List<Endpoint>> BuildEndpoints(WagiModules modules)
         {
             var endpoints = new List<Endpoint>();
 
             if (modules.Bindles?.Any() ?? default)
             {
-                LoadBindles(modules, this.loggerFactory);
+                await LoadBindles(modules, this.loggerFactory);
             }
 
-            // order of the items could be important.
-
-            var order = 1;
             foreach (var module in modules.Modules)
             {
                 var name = module.Key;
                 var route = module.Value.Route;
                 var originalRoute = module.Value.Route;
-                if (route.EndsWith("/...", StringComparison.InvariantCulture))
-                {
-                    route = $"{route.TrimEnd('.')}{{**path}}";
-                    logger.LogTrace($"Mapped Wildcard Route: {originalRoute} to {route}");
-                }
-
-                var moduleDetails = module.Value;
-                var fileName = moduleDetails.FileName;
+                route = CheckForWildcardRoute(route);
+                var wagiModuleInfo = module.Value;
+                var fileName = wagiModuleInfo.FileName;
                 var moduleFileAndPath = Path.Join(modules.ModulePath, fileName);
                 var moduleType = fileName.Split('.')[1].ToUpperInvariant();
-                var httpMethod = GetHTTPMethod(moduleDetails.HttpMethod);
+                var httpMethod = GetHTTPMethod(wagiModuleInfo.HttpMethod);
                 var allowedHosts = new List<Uri>();
-                if (moduleDetails.AllowedHosts?.Count > 0)
+                if (wagiModuleInfo.AllowedHosts?.Count > 0)
                 {
-                    foreach (var allowedHost in moduleDetails.AllowedHosts)
+                    foreach (var allowedHost in wagiModuleInfo.AllowedHosts)
                     {
                         allowedHosts.Add(new Uri(allowedHost));
                     }
                 }
 
-                var maxHttpRequests = (moduleDetails.MaxHttpRequests > 0 && moduleDetails.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit) ? moduleDetails.MaxHttpRequests : defaultHttpRequestLimit;
-                var hostnames = moduleDetails?.Hostnames is null ? string.Empty : string.Join(",", moduleDetails.Hostnames);
-                logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {moduleDetails.Entrypoint ?? "Default"} Route:{route} Hostnames: {hostnames}");
-                var pattern = RoutePatternFactory.Parse(route);
-                var endPointBuilder = new RouteEndpointBuilder(
-                    async context =>
-                    {
-                        await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, moduleDetails.Entrypoint, moduleResolver.Value, moduleDetails.Volumes, moduleDetails.Environment, allowedHosts, maxHttpRequests);
-                    },
-                    pattern,
-                    order);
+                var maxHttpRequests = (wagiModuleInfo.MaxHttpRequests > 0 && wagiModuleInfo.MaxHttpRequests < HttpRequestHandler.MaxHttpRequestLimit) ? wagiModuleInfo.MaxHttpRequests : defaultHttpRequestLimit;
+                var hostnames = wagiModuleInfo?.Hostnames is null ? string.Empty : string.Join(",", wagiModuleInfo.Hostnames);
 
-                foreach (var convention in this.conventions)
+                var endPointBuilder = GetEndpointBuilder(name, route, moduleFileAndPath, wagiModuleInfo, wagiModuleInfo.Entrypoint, hostnames, originalRoute, async context =>
                 {
-                    convention(endPointBuilder);
-                }
-
-                endPointBuilder.DisplayName = module.Key;
-                endPointBuilder.Metadata.Add(new WagiRouteAttribute(originalRoute));
-
-                if (moduleDetails.Hostnames != null && moduleDetails.Hostnames.Any())
-                {
-                    endPointBuilder.Metadata.Add(new HostAttribute(moduleDetails.Hostnames.ToArray()));
-                }
-
-                if (moduleDetails.Policies?.Count > 0 || moduleDetails.Roles?.Count > 0)
-                {
-                    if (moduleDetails.Policies?.Count > 0)
-                    {
-                        foreach (var policy in moduleDetails.Policies)
-                        {
-                            endPointBuilder.Metadata.Add(new AuthorizeAttribute(policy));
-                        }
-                    }
-
-                    if (moduleDetails.Roles?.Count > 0)
-                    {
-                        var authData = new AuthorizeAttribute
-                        {
-                            Roles = string.Join(',', moduleDetails.Roles.ToArray<string>()),
-                        };
-                        endPointBuilder.Metadata.Add(authData);
-                    }
-                }
-                else if (moduleDetails.Authorize)
-                {
-                    endPointBuilder.Metadata.Add(new AuthorizeAttribute());
-                }
-
+                    await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, wagiModuleInfo.Entrypoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests);
+                });
                 var endPoint = endPointBuilder.Build();
                 endpoints.Add(endPoint);
+
+                // Check for _routes entrypoint
+
+                try
+                {
+                    var wasmModule = moduleResolver.Value.GetWasmModule(moduleFileAndPath);
+                    var moduleExposesRoutes = wasmModule.Exports.ToList<Export>().Exists(f => (f.Name == RoutesEntryPoint && f is FunctionExport));
+                    if (moduleExposesRoutes)
+                    {
+
+                        var routes = await GetRouteDetails(wasmModule);
+                        foreach (var moduleRoutes in routes)
+                        {
+                            logger.LogTrace($"Adding module defined route: {moduleRoutes.route} EntryPoint: {moduleRoutes.entryPoint}");
+                            var resultantName = $"{name}/{moduleRoutes.route}".Replace("//", "/", StringComparison.InvariantCulture);
+                            var resultantOriginalRoute = $"{originalRoute.Trim('.')}/{moduleRoutes.route.TrimStart('/')}".Replace("//", "/", StringComparison.InvariantCulture);
+                            var resultantRoute = CheckForWildcardRoute(resultantOriginalRoute);
+                            endPointBuilder = GetEndpointBuilder(resultantName, resultantRoute, moduleFileAndPath, wagiModuleInfo, moduleRoutes.entryPoint, hostnames, resultantOriginalRoute, async context =>
+                            {
+                                await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, moduleRoutes.entryPoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests);
+                            });
+                            endPoint = endPointBuilder.Build();
+                            endpoints.Add(endPoint);
+                            logger.LogTrace($"Route: {moduleRoutes.route} EntryPoint: {moduleRoutes.entryPoint}");
+                        }
+                    }
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    logger.LogError($"Adding module defined route for Module Definition:{name} Failed - skipping", ex);
+                }
             }
 
             return endpoints;
+        }
+
+        private static async Task<List<(string route, string entryPoint)>> GetRouteDetails(Module wasmModule)
+        {
+            var routes = new List<(string route, string entryPoint)>();
+            var engine = moduleResolver.Value.Engine;
+            using var linker = new Linker(engine);
+            using var store = new Store(engine);
+            using var stdin = new TempFile();
+            using var stdout = new TempFile();
+            using var stderr = new TempFile();
+            var config = new WasiConfiguration()
+              .WithStandardOutput(stdout.Path)
+              .WithStandardInput(stdin.Path)
+              .WithStandardError(stderr.Path);
+            store.SetWasiConfiguration(config);
+            linker.DefineWasi();
+            var instance = linker.Instantiate(store, wasmModule);
+            var entrypoint = instance.GetFunction(store, RoutesEntryPoint);
+            entrypoint.Invoke(store);
+            using var stdoutStream = new FileStream(stdout.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var reader = new StreamReader(stdoutStream);
+            string line;
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                var routeDetails = line.Split(" ");
+                routes.Add((routeDetails[0], routeDetails[1]));
+            }
+            return routes;
+        }
+
+        private string CheckForWildcardRoute(string originalRoute)
+        {
+            var route = originalRoute;
+            if (originalRoute.EndsWith("/...", StringComparison.InvariantCulture))
+            {
+                route = $"{originalRoute.TrimEnd('.')}{{**path}}";
+                logger.LogTrace($"Mapped Wildcard Route: {originalRoute} to {route}");
+            }
+            return route;
+        }
+
+        private EndpointBuilder GetEndpointBuilder(string name, string route, string moduleFileAndPath, WagiModuleInfo wagiModuleInfo, string entryPoint, string hostnames, string originalRoute, RequestDelegate requestDelegate)
+        {
+            logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {entryPoint ?? "Default"} Route:{route} Hostnames: {hostnames}");
+            var pattern = RoutePatternFactory.Parse(route);
+            var endPointBuilder = new RouteEndpointBuilder(requestDelegate, pattern, 1);
+            foreach (var convention in this.conventions)
+            {
+                convention(endPointBuilder);
+            }
+
+            endPointBuilder.DisplayName = name;
+            endPointBuilder.Metadata.Add(new WagiRouteAttribute(originalRoute));
+
+            if (wagiModuleInfo.Hostnames != null && wagiModuleInfo.Hostnames.Any())
+            {
+                endPointBuilder.Metadata.Add(new HostAttribute(wagiModuleInfo.Hostnames.ToArray()));
+            }
+
+            if (wagiModuleInfo.Policies?.Count > 0 || wagiModuleInfo.Roles?.Count > 0)
+            {
+                if (wagiModuleInfo.Policies?.Count > 0)
+                {
+                    foreach (var policy in wagiModuleInfo.Policies)
+                    {
+                        endPointBuilder.Metadata.Add(new AuthorizeAttribute(policy));
+                    }
+                }
+
+                if (wagiModuleInfo.Roles?.Count > 0)
+                {
+                    var authData = new AuthorizeAttribute
+                    {
+                        Roles = string.Join(',', wagiModuleInfo.Roles.ToArray<string>()),
+                    };
+                    endPointBuilder.Metadata.Add(authData);
+                }
+            }
+            else if (wagiModuleInfo.Authorize)
+            {
+                endPointBuilder.Metadata.Add(new AuthorizeAttribute());
+            }
+
+            return endPointBuilder;
         }
 
         public override IChangeToken GetChangeToken()
@@ -240,10 +309,10 @@ namespace Deislabs.Wagi.DataSource
             this.conventions.Add(convention);
         }
 
-        private static void LoadBindles(WagiModules modules, ILoggerFactory loggerFactory)
+        private static async Task LoadBindles(WagiModules modules, ILoggerFactory loggerFactory)
         {
             var bindleResolver = new BindleResolver(modules, loggerFactory);
-            bindleResolver.LoadInvoice().Wait();
+            await bindleResolver.LoadInvoice();
         }
         private static string GetHTTPMethod(string httpMethod) => string.IsNullOrEmpty(httpMethod) ? "GET" : httpMethod;
 

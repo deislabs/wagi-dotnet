@@ -197,7 +197,7 @@
             if (originalRoute.Route.EndsWith("/...", StringComparison.InvariantCulture))
             {
                 var routePrefix = originalRoute.Route.TrimEnd('.');
-                var xRelativePath = req.Path.Value.Remove(0, routePrefix.Length);
+                var xRelativePath = req.Path.Value.Length >= routePrefix.Length ? req.Path.Value.Remove(0, routePrefix.Length) : string.Empty;
                 environmentVariables.Add(("X_RELATIVE_PATH", xRelativePath));
             }
             else

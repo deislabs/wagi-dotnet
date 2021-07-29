@@ -27,11 +27,11 @@
 
   <ItemGroup>
     <Content Include="..\simplehttp\modules\blob.wasm">
-      <Link>.\modules\blob.wasm</Link>
+      <Link>modules\blob.wasm</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\simplehttp\modules\optimized.wasm">
-      <Link>.\modules\optimized.wasm</Link>
+      <Link>modules\optimized.wasm</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
