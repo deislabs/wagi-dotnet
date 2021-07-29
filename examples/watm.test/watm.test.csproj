@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <Content Include="..\watm\modules\hello.wat">
-      <Link>.\modules\hello.wat</Link>
+      <Link>modules\hello.wat</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

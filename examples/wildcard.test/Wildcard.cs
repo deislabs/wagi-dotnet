@@ -20,19 +20,22 @@ namespace Wildcard.Test
             (string path, string route)[] tests =
             {
                 ("/path","/path"),
+                ("/path/","/path"),
                 ("/path/other","/path/..."),
+                ("/path/other/","/path/..."),
                 ("/path/some/other","/path/..."),
                 ("/some/other/path","/..."),
-                ("/someotherroute","/...")
+                ("/someotherroute","/..."),
+                ("/someotherroute/","/...")
             };
 
-            foreach (var test in tests)
+            foreach (var (path, route) in tests)
             {
                 var client = factory.CreateClient();
-                var response = await client.GetAsync(test.path);
+                var response = await client.GetAsync(path);
                 var result = await response.Content.ReadAsStringAsync();
                 Assert.True(response.IsSuccessStatusCode);
-                Assert.Equal(test.route, GetRouteValue(result));
+                Assert.Equal(route, GetRouteValue(result));
             }
 
         }

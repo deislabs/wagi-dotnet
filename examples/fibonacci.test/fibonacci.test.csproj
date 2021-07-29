@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <Content Include="..\fibonacci\modules\fibonacci.wasm">
-      <Link>.\modules\fibonacci.wasm</Link>
+      <Link>modules\fibonacci.wasm</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

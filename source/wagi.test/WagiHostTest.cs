@@ -20,7 +20,9 @@ namespace Deislabs.Wagi.Test
             (string path, string relativePath)[] tests =
             {
                 ("/path",""),
+                ("/path/",""),
                 ("/path/other","other"),
+                ("/path/other/","other/"),
                 ("/path/some/other","some/other"),
                 ("/some/other/path","some/other/path"),
                 ("/someotherroute","someotherroute")
@@ -31,13 +33,13 @@ namespace Deislabs.Wagi.Test
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
             var testServer = TestHelpers.CreateTestServer("testdata/testX_RELATIVE_PATHSettings.json", mockLoggerFactory);
 
-            foreach (var test in tests)
+            foreach (var (path, relativePath) in tests)
             {
                 var client = testServer.CreateClient();
-                var response = await client.GetAsync(test.path);
+                var response = await client.GetAsync(path);
                 var result = await response.Content.ReadAsStringAsync();
                 Assert.True(response.IsSuccessStatusCode);
-                Assert.Equal(test.relativePath, TestHelpers.GetEnvVarFromOuptut(result, "X_RELATIVE_PATH"));
+                Assert.Equal(relativePath, TestHelpers.GetEnvVarFromOuptut(result, "X_RELATIVE_PATH"));
             }
         }
     }
