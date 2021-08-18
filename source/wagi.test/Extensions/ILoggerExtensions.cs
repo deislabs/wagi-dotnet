@@ -1,8 +1,9 @@
-namespace Deislabs.Wagi.Test.Extensions
+﻿namespace Deislabs.Wagi.Test.Extensions
 {
     using System;
     using Microsoft.Extensions.Logging;
     using Moq;
+    using Xunit;
 
     public static class MockExtensions
     {
@@ -24,19 +25,22 @@ namespace Deislabs.Wagi.Test.Extensions
             return logger;
         }
 
-        private static Mock<ILogger> VerifyLog(Mock<ILogger> logger, string expectedMessage, LogLevel logLevel)
+        private static Mock<ILogger> VerifyLog(Mock<ILogger> logger, string expectedMessage, LogLevel expectedLogLevel, Times? times = null)
         {
-            Func<object, Type, bool> state = (v, t) => v.ToString().CompareTo(expectedMessage) == 0;
+            times ??= Times.Once();
 
             logger.Verify(
                 x => x.Log(
-                    It.Is<LogLevel>(l => l == logLevel),
+                    It.Is<LogLevel>(logLevel => logLevel == expectedLogLevel),
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => state(v, t)),
+                    It.Is<It.IsAnyType>((message, type) => CheckExpectedMessage(message, expectedMessage)),
                     It.IsAny<Exception>(),
-                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)));
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), times.Value);
 
             return logger;
         }
+
+        private static bool CheckExpectedMessage(object message, string expectedMessage)
+            => message.ToString().CompareTo(expectedMessage) == 0;
     }
 }

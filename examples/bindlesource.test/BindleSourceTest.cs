@@ -20,16 +20,17 @@ namespace BindleSource.Test
 
             var response = await client.GetAsync("/1.1.0");
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
+
 
             baseAddress = new Uri("http://127.0.0.1:5005");
             client = factory.CreateDefaultClient(baseAddress);
 
             response = await client.GetAsync("/1.1.0");
             result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
         }
 
         [Fact]
@@ -40,8 +41,8 @@ namespace BindleSource.Test
 
             var response = await client.GetAsync("/v1");
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("Kia ora, world from 1.1.0!", result.TrimEnd());
         }
 
         [Fact]
@@ -51,8 +52,8 @@ namespace BindleSource.Test
 
             var response = await client.GetAsync("/");
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Hello, world from 1.0.0!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("Hello, world from 1.0.0!", result.TrimEnd());
         }
     }
 }

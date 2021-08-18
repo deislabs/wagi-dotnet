@@ -1,4 +1,4 @@
-namespace Deislabs.Wagi.Helpers
+﻿namespace Deislabs.Wagi.Helpers
 {
     using System;
     using System.Collections.Concurrent;
@@ -39,12 +39,12 @@ namespace Deislabs.Wagi.Helpers
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                throw new ApplicationException("FileName is Null");
+                throw new ArgumentNullException(nameof(fileName));
             }
 
             return this.modules.GetOrAdd(fileName, (filename) =>
             {
-                var moduleType = fileName.Split('.')[1].ToUpperInvariant();
+                var moduleType = fileName.Split('.')[^1].ToUpperInvariant();
                 return moduleType switch
                 {
                     "WASM" => Module.FromFile(engine, fileName),

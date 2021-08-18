@@ -117,7 +117,7 @@
             string line;
             while ((line = await errreader.ReadLineAsync()) != null)
             {
-                this.logger.LogError($"Error from Module {this.wasmFile} Function {this.entryPoint}. Error:{line.TrimEnd('\0')}");
+                this.logger.LogWarning($"stderr output from Module {this.wasmFile} Function {this.entryPoint}. Output:{line.TrimEnd('\0')}");
             }
 
             await this.ProcessOutput(stdout.Path);
@@ -308,7 +308,7 @@
 
             if (!sufficientResponse)
             {
-                throw new ApplicationException("Module did not produce either location or content-type headers");
+                throw new InvalidOperationException("Module did not produce either location or content-type headers");
             }
 
             if (contentType.Length > 0)

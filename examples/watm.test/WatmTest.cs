@@ -19,9 +19,8 @@ namespace Watm.Test
 
             var response = await client.GetAsync("/hellowat");
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Hello World!", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
-
+            Assert.Equal("Hello World!", result.TrimEnd());
         }
     }
 }

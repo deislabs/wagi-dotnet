@@ -122,7 +122,7 @@ namespace Deislabs.Wagi.Helpers
             var parcelFullPath = Path.GetFullPath(parcelFileModulePath);
             if (!parcelFullPath.StartsWith(rootPath, true, CultureInfo.InvariantCulture))
             {
-                throw new ApplicationException($"Attempt to traverse file system with path {name}");
+                throw new InvalidOperationException($"Attempt to traverse file system with path {name}");
             }
             Directory.CreateDirectory(Path.GetDirectoryName(parcelFileModulePath));
             if (!File.Exists(parcelFileCachePath))

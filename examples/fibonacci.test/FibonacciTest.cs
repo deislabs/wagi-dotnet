@@ -18,9 +18,8 @@ namespace Fibonacci.Test
 
             var response = await client.GetAsync("/fibonacci?23");
             var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("fib(23)=28657", result.TrimEnd());
             Assert.True(response.IsSuccessStatusCode);
-
+            Assert.Equal("fib(23)=28657", result.TrimEnd());
         }
     }
 }

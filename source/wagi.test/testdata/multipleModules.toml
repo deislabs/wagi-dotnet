@@ -1,0 +1,14 @@
+[[module]]
+route = "/static/..."
+module = "/fileserver/fileserver.gr.wasm"
+volumes = {"/" = "."}
+
+[[module]]
+route = "/static1/..."
+module = "/fileserver/fileserver.gr.wasm"
+volumes = {"/" = "."}
+
+[[module]]
+route = "/static2/..."
+module = "/fileserver/fileserver.gr.wasm"
+volumes = {"/" = "."}
