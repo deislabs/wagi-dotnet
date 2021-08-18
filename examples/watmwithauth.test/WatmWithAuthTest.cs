@@ -46,8 +46,8 @@ namespace Watmwithauth.Test
                 var content = new StringContent($"username={user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
                 var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={path}", content);
                 var result = await response.Content.ReadAsStringAsync();
-                Assert.Equal("Hello World!", result.TrimEnd());
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal("Hello World!", result.TrimEnd());
             }
         }
 
@@ -63,8 +63,8 @@ namespace Watmwithauth.Test
                 var content = new StringContent($"username={user}&password=admin", Encoding.UTF8, "application/x-www-form-urlencoded");
                 var response = await client.PostAsync($"http://localhost/Home/Login?ReturnUrl={path}", content);
                 var result = await response.Content.ReadAsStringAsync();
-                Assert.Contains($"Access Denied. User <b>{user}</b> does not have access to <b> {path}</b>", result);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains($"Access Denied. User <b>{user}</b> does not have access to <b> {path}</b>", result);
             }
         }
     }

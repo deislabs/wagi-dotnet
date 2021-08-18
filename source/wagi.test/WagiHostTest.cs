@@ -1,12 +1,5 @@
-﻿
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Deislabs.Wagi.Test;
-using Deislabs.Wagi.Test.Extensions;
-using Microsoft.AspNetCore.Hosting;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -31,7 +24,7 @@ namespace Deislabs.Wagi.Test
             var mockLogger = new Mock<ILogger>();
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
-            var testServer = TestHelpers.CreateTestServer("testdata/testX_RELATIVE_PATHSettings.json", mockLoggerFactory);
+            var testServer = TestHelpers.CreateTestServer(new string[] { "testdata/testX_RELATIVE_PATHSettings.json" }, mockLoggerFactory);
 
             foreach (var (path, relativePath) in tests)
             {

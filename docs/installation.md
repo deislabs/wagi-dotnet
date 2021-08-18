@@ -1,12 +1,35 @@
 # Installing the WAGI extension
 
-The WAGI extension is installed using nuget.
+The WAGI extension is installed using nuget. There are 2 nuget packages, one contains wagi-dotnet and the other provides a set of templates to create new wagi-dotnet projects.
 
 ## Prerequisites
 
 - [.Net 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
 
-## Create a new ASP.Net application
+## Install the WAGI extension package
+
+``` console
+dotnet add package Deislabs.WAGI  --prerelease
+ Determining projects to restore...
+  Writing /tmp/tmpYrGzPC.tmp
+info : Adding PackageReference for package 'Deislabs.WAGI' into project '/tmp/wagiproj/WagiTest.csproj'.
+info : Restoring packages for /tmp/wagiproj/WagiTest.csproj...
+info : Package 'Deislabs.WAGI' is compatible with all the specified frameworks in project '/tmp/wagiproj/WagiTest.csproj'.
+info : PackageReference for package 'Deislabs.WAGI' version '0.7.0-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
+info : Committing restore...
+info : Writing assets file to disk. Path: /tmp/wagiproj/obj/project.assets.json
+log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
+```
+
+## Install the WAGI extension package from Github packages
+
+Only released versions of the WAGI extension are availble from nuget.org, more recent builds are available in Github Packages, to install a nuget package from Github:
+
+```console
+dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/deislabs/index.json
+```
+
+## Create a new ASP.Net application without using the wagi-donet templates.
 
 To create a new, run the following command:
 
@@ -21,34 +44,31 @@ Running 'dotnet restore' on /tmp/wagitest/wagitest.csproj...
 Restore succeeded.
 ```
 
-## Install the WAGI extension package
+## Add Wagi endpoint configuration to your ASP.Net application
 
-``` console
-dotnet add package Deislabs.WAGI  --prerelease
- Determining projects to restore...
-  Writing /tmp/tmpYrGzPC.tmp
-info : Adding PackageReference for package 'Deislabs.WAGI' into project '/tmp/wagiproj/WagiTest.csproj'.
-info : Restoring packages for /tmp/wagiproj/WagiTest.csproj...
-info : Package 'Deislabs.WAGI' is compatible with all the specified frameworks in project '/tmp/wagiproj/WagiTest.csproj'.
-info : PackageReference for package 'Deislabs.WAGI' version '0.6.0-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
-info : Committing restore...
-info : Writing assets file to disk. Path: /tmp/wagiproj/obj/project.assets.json
-log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
+### Modify `Startup.cs` to configure endpoints for WAGI modules.
+
+Add a constructor and property to your `Startup.cs` file:
+
+``` csharp
+    public IConfiguration Configuration { get; }
+
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
 ```
 
-## Install the WAGI extension package from Github packages
+Add the following code to the ConfigureServices method:
 
-Only released versions of the WAGI extension are availble from nuget.org, more recent builds are available in Github Packages, to install a nuget package from Github:
-
-```console
-dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/deislabs/index.json
+``` csharp
+    services.AddHttpClient();
+    services.AddWagi(Configuration);
 ```
 
-## Add Wagi endpoint configuration
+The HttpClient service is required to allow Wagi modules to make outgoing HTTP requests using  [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). (see [here](configuring_and-running.md#making-http-requests-from-modules) for details.).
 
-Modify `Startup.cs` to configure endpoints for WAGI modules.
-
-In method `Configure` modify the call to method `app.UseEndpoints` from this:
+In the `Configure` method modify the call to method `app.UseEndpoints` from this:
 
 ``` csharp
   app.UseEndpoints(endpoints =>
@@ -63,11 +83,14 @@ In method `Configure` modify the call to method `app.UseEndpoints` from this:
 to this:
 
 ``` csharp
-  app.UseEndpoints(endpoints =>
-  {
-      endpoints.MapWASMModules();
-  });
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapWagiModules();
+    });
 ```
+
+Calling `MapWagiModules()` maps all configured wagi modules.
+
 
 ## What's Next?
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,7 +83,7 @@ namespace Deislabs.Wagi.Configuration
                         result.AppendLine($"Missing module file name for module name {moduleName}");
                     }
 
-                    var moduleType = module.Value.FileName.Split('.')[1].ToUpperInvariant();
+                    var moduleType = module.Value.FileName.Split('.')[^1].ToUpperInvariant();
                     if (moduleType != "WAT" && moduleType != "WASM")
                     {
                         result.AppendLine($"Module Filename extension should be either .wat or .wasm Filename: {module.Value.FileName} for module name {moduleName}");

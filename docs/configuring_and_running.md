@@ -24,6 +24,7 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: /tmp/wagiproj
+```
 
 Notice that there is an error message produced as the extension is not yet configured to serve any WAGI module requests. In order to do this the extension must be configured as described below, note that any changes to configuration are not dynamially applied, you need to restart the application for changes to be picked up.
 
@@ -34,8 +35,8 @@ The extension is driven by configuration which can be provided using any [dotnet
 Example Configuration:
 
 ``` json
- "WASM": {
-    "CacheConfigPath" : "cache.toml"
+ "Wagi": {
+    "CacheConfigPath" : "cache.toml",
     "ModulePath": "modules",
     "MaxHttpRequests": 20,
     "BindleServer" : "https://my.bindle.server/v1",
@@ -80,7 +81,7 @@ Example Configuration:
   }
 ```
 
-Configuration for the extension is defined in a configuration section which is named `WASM` by default, any valid name can be used for this section, if you use a non default name then you should pass the section name to the ```MapWASMModules``` extension method.
+Configuration for the extension is defined in a configuration section which is named `Wagi` by default, any valid name can be used for this section, if you use a non default name then you should pass the section name to the ``AddWagi``` extension method.
 
 - Fields
   - `CacheConfigPath`: The path to a wasmtime cache configuration file see [here](#enabling-caching) for details. 
@@ -111,7 +112,7 @@ Configuration for the extension is defined in a configuration section which is n
 Here is a brief example of a configuration file that declares two routes:
 
 ```json
- "WASM": {
+ "Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "hello": {
@@ -145,7 +146,7 @@ The `FileName` property is the name of a `wasm` or `wat` file on the filesystem.
 Routes can be restricted to a subset of the addresses that the server is listening on by specifying the `Hostnames` property:
 
 ```json
- "WASM": {
+ "Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "hello": {
@@ -176,7 +177,7 @@ But it is definitely the case that code sometimes needs access to files.
 Here is an example of providing a volume:
 
 ```json
- "WASM": {
+ "Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Access Files": {
@@ -200,7 +201,7 @@ Similarly to volumes, by default a WebAssembly module cannot access the host's e
 However, the environment property provides a way for you to pass in environment variables:
 
 ```json
- "WASM": {
+ "Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Env Vars Example": {
@@ -232,7 +233,7 @@ The following example shows loading the same module at three different paths, ea
 invoking a different function:
 
 ```json
-"WASM": {
+"Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "hello": {
@@ -263,7 +264,7 @@ By adding additional properties to a modules configuration runtime access can be
 The simplest example is to require that a user is authenticated to access the module, the following example shows how to configure a module to require that all users that access it be authnticated.
 
 ```json
-"WASM": {
+"Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Hellowat with auth": {
@@ -280,7 +281,7 @@ With this configuration access to the module will only be granted to logged in u
 It is also possible to require that the logged in user is a member of one or more roles, for example:
 
 ```json
-"WASM": {
+"Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Hellowat with role": {
@@ -297,7 +298,7 @@ With this configuration the logged in user must be assigned the ```admin``` role
 It is also possible to require that the logged in user satisfies one or more [policies](https://docs.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-5.0) in order to access the module:
 
 ```json
-"WASM": {
+"Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Hellowat with Policy": {
@@ -318,7 +319,7 @@ To enforce authorization on modules requires that ASP.Net is configured correctl
 Modules can make HTTP Requests using the [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) API. To use this the modules configuration must provide an array of hosts that the module commuicates with , without this modules will be unable to make requests, in addition a modules configuration may override the maximum number of requests that an instance of the module can make:
 
 ```json
-"WASM": {
+"Wagi": {
     "ModulePath": "modules",
     "Modules": {
       "Outbound HTTP": {
@@ -357,7 +358,7 @@ files-total-size-soft-limit = "10Gi"
 Then update the configuration to use it:
 
 ```json
-"WASM": {
+"Wagi": {
     "CacheConfigPath" : "cache.toml",
     "ModulePath": "modules",
     "Modules": {
@@ -374,7 +375,7 @@ Then update the configuration to use it:
 To load modules defined as bindle create one or more bindle configuration entries, each entry contains the URL to a Bindle server and the name of the bindle containing the modules to configure:
 
 ```
-"WASM": {
+"Wagi": {
   "ModulePath": "modules",
   "BindleServer" : "https://some.bindleserver.com/v1",
   "Bindles": {
@@ -391,7 +392,7 @@ In the above example when the `MapWASMModules` extension method is called it wil
 Simlarly to local modules, bindle modules Routes can be restricted to a subset of the addresses that the server is listening on by specifying the `Hostnames` property:
 
 ```json
-"WASM": {
+"Wagi": {
   "ModulePath": "modules",
   "BindleServer" : "https://some.bindleserver.com/v1",
   "Bindles": {
@@ -405,6 +406,25 @@ Simlarly to local modules, bindle modules Routes can be restricted to a subset o
 ```
 In this case the modules in the bindle would only be accessible at the URL http://localhost:8080/. (Assuming that the server is listening using HTTP)
 
+## Using modules.toml 
+
+A Wagi [modules.toml](https://github.com/deislabs/wagi/blob/main/docs/configuring_and_running.md#the-modulestoml-configuration-file) configuration file can also be used to configure the modules that are loaded by the server. To do this use the extension Method `AddModulesTomlFile` in namespace `Deislabs.Wagi.Configuration.Modules.Toml` e.g:
+
+```csharp
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            }).ConfigureAppConfiguration(builder =>
+            {
+                builder.AddModulesTomlFile("modules.toml", false, true);
+            });
+
+```
+
+Note that using modules.toml requires that the configuration section is called Wagi ,calling AddWagi with a different section name will not work. Also note that whilst modules.toml support is provided by a custom configuration provider that provider only supports modules.toml and not any other configuration.
 ## What's Next?
 
 Next, read about [Writing Modules](writing_modules.md) for WAGI.

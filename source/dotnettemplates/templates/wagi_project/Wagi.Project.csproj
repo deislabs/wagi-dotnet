@@ -4,9 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <!--<ItemGroup>
-    <PackageReference Include="Deislabs.WAGI" Version="0.6.0-preview" />
-  </ItemGroup>-->
+  <ItemGroup>
+    <PackageReference Include="Deislabs.WAGI" Version="0.7.0-preview" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include=".\modules\*.*">
@@ -14,10 +14,5 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
-
-
-    <ItemGroup>
-        <ProjectReference Include="C:\Users\sdavies\source\repos\wagi-dotnet\source\wagi\wagi.csproj" />
-    </ItemGroup>
 
 </Project>

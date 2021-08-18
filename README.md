@@ -33,10 +33,10 @@ To create a ASP.Net Core web application that host a demo WAGI Module:
 ***Note: nuget.org only contains (pre-)released versions of the packages, to install the latest versions follow the instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry) to set up GitHub packages registry as a source for nuget packages.***
 
 ``` Console
-dotnet new -i Deislabs.WAGI.Templates::0.6.0-preview
+dotnet new -i Deislabs.WAGI.Templates::0.7.0-preview
 ```
 
-This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.6.0-preview`.
+This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.7.0-preview`.
 
 ``` Console
 dotnet new wagi -n hello-wagi
@@ -95,6 +95,7 @@ dotnet build -c Release
 - [watmwithauth](examples/watmwithauth/README.md): watm Hello world example showing how to use Authorisation, Roles and Policy.
 - [simplehttp](examples/simplehttp/README.md): Shows how to use [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) to make HTTP Requests from modules, there is an example written in AssemblyScript which calls https://postman-echo.com/ ([Source](https://github.com/simongdavies/http-wagi-as)) and an example written in Rust which uses an experimental version of the [Azure SDK for Rust](https://github.com/radu-matei/azure-sdk-for-rust/tree/enable-wasi-experimental-http) to read and write a blob to Azure Storage ([Source](https://github.com/simongdavies/http-azure-rust)).
 - [bindle](examples/bindle/README.md): An example showing how to use [bindle](https://github.com/deislabs/bindle) to provide modules to be hosted by wagi-dotnet.
+- [modules.toml](examples/modules.toml/README.md): shows how to use a [modules.toml](https://github.com/deislabs/wagi/blob/main/docs/configuring_and_running.md#the-modulestoml-configuration-file) configuration file to configure wagi-dotnet.
 
 ### Other examples
 
