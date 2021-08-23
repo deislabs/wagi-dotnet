@@ -1,4 +1,6 @@
-﻿namespace Deislabs.Wagi.Helpers
+﻿[assembly: System.CLSCompliant(false)]
+
+namespace Deislabs.Wagi.Helpers
 {
     using System;
     using System.Collections.Generic;
