@@ -1,0 +1,22 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Trace",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Deislabs.WAGI": "Trace"
+    }
+  },
+  "Wagi": {
+    "ModulePath": "testdata/modules",
+    "Modules": {
+        "/": {
+            "FileName": "env_wagi.wasm",
+            "Volumes": {
+                "/": "testdata/files"
+            },
+            "Route": "/"
+        }
+    }
+  }
+}
