@@ -6,6 +6,7 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
@@ -13,7 +14,6 @@
     using Deislabs.Wagi.Extensions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
@@ -28,7 +28,7 @@
     internal class WagiHost
     {
         private const string Version = "CGI/1.1";
-        private const string ServerVersion = "Wagi/1";
+        private const string ServerVersion = "WAGI/1";
         private readonly HttpContext context;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
@@ -174,13 +174,10 @@
             }
 
             environmentVariables.Add(("CONTENT_TYPE", req.ContentType));
-            environmentVariables.Add(("X_FULL_URL", $"{req.Scheme}://{req.Host}{req.Path}{req.QueryString}"));
             environmentVariables.Add(("GATEWAY_INTERFACE", Version));
             environmentVariables.Add(("X_MATCHED_ROUTE", originalRoute?.Route ?? string.Empty));
-            environmentVariables.Add(("PATH_INFO", req.Path));
 
-            // TODO: implement Path Translated
-            environmentVariables.Add(("PATH_TRANSLATED", req.Path));
+
             environmentVariables.Add(("QUERY_STRING", req.QueryString.HasValue ? req.QueryString.Value.Remove(0, 1) : string.Empty));
             environmentVariables.Add(("REMOTE_ADDR", this.context.Connection.RemoteIpAddress?.ToString()));
             environmentVariables.Add(("REMOTE_HOST", this.context.Connection.RemoteIpAddress?.ToString()));
@@ -188,27 +185,31 @@
             // TODO: set Remote User
             environmentVariables.Add(("REMOTE_USER", string.Empty));
             environmentVariables.Add(("REQUEST_METHOD", req.Method));
-            environmentVariables.Add(("SCRIPT_NAME", this.wasmFile));
+            environmentVariables.Add(("SCRIPT_NAME", originalRoute?.Route.TrimEnd('.').TrimEnd('/') ?? "/"));
             environmentVariables.Add(("SERVER_NAME", req.Host.Host));
             environmentVariables.Add(("SERVER_PORT", Convert.ToString(req.Host.Port ?? 80, CultureInfo.InvariantCulture)));
-            environmentVariables.Add(("SERVER_PROTOCOL", req.Scheme));
+            environmentVariables.Add(("SERVER_PROTOCOL", req.Protocol));
             environmentVariables.Add(("SERVER_SOFTWARE", ServerVersion));
 
-            if (originalRoute.Route.EndsWith("/...", StringComparison.InvariantCulture))
+            var pathInfo = "";
+            var routePrefix = originalRoute.Route;
+            if (routePrefix.EndsWith("/...", StringComparison.InvariantCulture))
             {
-                var routePrefix = originalRoute.Route.TrimEnd('.');
-                var xRelativePath = req.Path.Value.Length >= routePrefix.Length ? req.Path.Value.Remove(0, routePrefix.Length) : string.Empty;
-                environmentVariables.Add(("X_RELATIVE_PATH", xRelativePath));
+                routePrefix = routePrefix.TrimEnd('.').TrimEnd('/');
+                pathInfo = req.Path.Value.Length >= routePrefix.Length ? req.Path.Value.Remove(0, routePrefix.Length) : string.Empty;
             }
-            else
-            {
-                environmentVariables.Add(("X_RELATIVE_PATH", string.Empty));
-            }
+
+            environmentVariables.Add(("PATH_INFO", pathInfo));
+            environmentVariables.Add(("PATH_TRANSLATED", pathInfo));
+
+            var rawPathInfo = UrlEncode(pathInfo);
+            environmentVariables.Add(("X_RAW_PATH_INFO", rawPathInfo));
+            environmentVariables.Add(("X_FULL_URL", $"{req.Scheme}://{req.Host}{routePrefix}{rawPathInfo}{req.QueryString}"));
 
             foreach (var header in headers)
             {
                 var key = $"HTTP_{header.Key.Replace("-", "_", StringComparison.InvariantCultureIgnoreCase)}";
-                if (key == "HTTP_AUHTORIZATION" || key == "HTTP_CONNECTION")
+                if (key.ToUpperInvariant() == "HTTP_AUTHORIZATION" || key.ToUpperInvariant() == "HTTP_CONNECTION")
                 {
                     continue;
                 }
@@ -292,6 +293,7 @@
                         {
                             statusCode = Convert.ToInt32(headerValue.Split(" ")[0], CultureInfo.InvariantCulture);
                             reason = headerValue.Split(" ")[1];
+                            logger.LogTrace($"Ignoring Reason {reason}");
                         }
                         else
                         {
@@ -317,10 +319,6 @@
             }
 
             this.context.Response.StatusCode = statusCode;
-            if (reason.Length > 0)
-            {
-                this.context.Response.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase = reason;
-            }
 
             if (responseBuilder.Length > 0)
             {

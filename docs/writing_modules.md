@@ -111,11 +111,11 @@ In general, you can use your language's built-in libraries to access this inform
 Consider the following HTTP request:
 
 ```console
-$ curl -vvv -H "HOST:foo.example.com" localhost:3000/env?greet=matt\&foo=bar
+$ curl -vvv -H "HOST:foo.example.com" localhost:3000/env/foo?greet=matt\&foo=bar
 *   Trying 127.0.0.1...
 * TCP_NODELAY set
 * Connected to localhost (127.0.0.1) port 3000 (#0)
-> GET /env?greet=matt&foo=bar HTTP/1.1
+> GET /env/foo?greet=matt&foo=bar HTTP/1.1
 > Host:foo.example.com
 > User-Agent: curl/7.64.1
 > Accept: */*
@@ -127,7 +127,7 @@ WAGI will take that information and present it to the module as follows:
 
 The arguments (aka command line options, flags) will contain the path query string as if the command had been typed in like this:
 
-``` console
+```
 /env greet=matt foo=bar
 ```
 
@@ -138,12 +138,10 @@ Some may importing special packages.
 
 The above request will result in a whole bunch of environment variables being set:
 
-``` console
+```
 REMOTE_ADDR = 127.0.0.1
-X_MATCHED_ROUTE = /env
 HTTP_HOST = foo.example.com
 SERVER_PORT = 80
-SCRIPT_NAME = /Users/technosophos/Code/Rust/env_wagi/target/wasm32-wasi/release/env_wagi.wasm
 CONTENT_LENGTH = 0
 CONTENT_TYPE =
 TEST_NAME = test value
@@ -153,8 +151,10 @@ GATEWAY_INTERFACE = CGI/1.1
 SERVER_NAME = foo.example.com
 HTTP_USER_AGENT = curl/7.64.1
 AUTH_TYPE =
-PATH_TRANSLATED = /env
-PATH_INFO = /env
+X_MATCHED_ROUTE = /env/...
+SCRIPT_NAME = /env
+PATH_INFO = /foo
+PATH_TRANSLATED = /foo
 HTTP_ACCEPT = */*
 SERVER_PROTOCOL = http
 REQUEST_METHOD = GET
@@ -163,9 +163,8 @@ X_FULL_URL = http://foo.example.com/env?greet=matt&foo=bar
 QUERY_STRING = greet=matt&foo=bar
 ```
 
-Most languages provide a convenient way to access environment variables.
-WASI provides an implementation of this OS facility (Which is why we require `wasm32-wasi` as the compile target).
-
+See the [Environment Variables Reference](environment_variables.md) for a description of
+each environment variable.
 ### Standard Out
 
 In previous examples we have seen how you can use `println()` or `console.log()` or other high-level functions to send information to the client.
@@ -181,7 +180,7 @@ Use your language's built-in libraries to access this information.
 
 ### Mapped Volumes
 
-If your configuration declares one or more `volumes` mount, the volumes will be attached to your module as a filesystem.
+If your configuration declares one or more `volumes` mount(s), the volumes will be attached to your module as a filesystem.
 
 You can use your language's built-in file IO library to work with these files.
 
