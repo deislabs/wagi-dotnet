@@ -47,9 +47,9 @@ namespace Deislabs.Wagi.Test
             {
                 while ((line = reader.ReadLine()) is not null)
                 {
-                    if (line.StartsWith(envvarname))
+                    if (line.StartsWith(envvarname, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        return line.Split('=')[1]?.Trim() ?? null;
+                        return line.Substring(line.IndexOf("=") + 1).Trim();
                     }
                 }
             }

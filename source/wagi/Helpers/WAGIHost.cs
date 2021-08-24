@@ -174,7 +174,6 @@
             }
 
             environmentVariables.Add(("CONTENT_TYPE", req.ContentType));
-            environmentVariables.Add(("X_FULL_URL", $"{req.Scheme}://{req.Host}{req.Path}{req.QueryString}"));
             environmentVariables.Add(("GATEWAY_INTERFACE", Version));
             environmentVariables.Add(("X_MATCHED_ROUTE", originalRoute?.Route ?? string.Empty));
 
@@ -193,19 +192,24 @@
             environmentVariables.Add(("SERVER_SOFTWARE", ServerVersion));
 
             var pathInfo = "";
-            if (originalRoute.Route.EndsWith("/...", StringComparison.InvariantCulture))
+            var routePrefix = originalRoute.Route;
+            if (routePrefix.EndsWith("/...", StringComparison.InvariantCulture))
             {
-                var routePrefix = originalRoute.Route.TrimEnd('.').TrimEnd('/');
+                routePrefix = routePrefix.TrimEnd('.').TrimEnd('/');
                 pathInfo = req.Path.Value.Length >= routePrefix.Length ? req.Path.Value.Remove(0, routePrefix.Length) : string.Empty;
             }
 
             environmentVariables.Add(("PATH_INFO", pathInfo));
-            environmentVariables.Add(("PATH_TRANSLATED", UrlDecode(pathInfo)));
+            environmentVariables.Add(("PATH_TRANSLATED", pathInfo));
+
+            var rawPathInfo = UrlEncode(pathInfo);
+            environmentVariables.Add(("X_RAW_PATH_INFO", rawPathInfo));
+            environmentVariables.Add(("X_FULL_URL", $"{req.Scheme}://{req.Host}{routePrefix}{rawPathInfo}{req.QueryString}"));
 
             foreach (var header in headers)
             {
                 var key = $"HTTP_{header.Key.Replace("-", "_", StringComparison.InvariantCultureIgnoreCase)}";
-                if (key == "HTTP_AUHTORIZATION" || key == "HTTP_CONNECTION")
+                if (key.ToUpperInvariant() == "HTTP_AUTHORIZATION" || key.ToUpperInvariant() == "HTTP_CONNECTION")
                 {
                     continue;
                 }
