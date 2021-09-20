@@ -38,6 +38,7 @@ dotnet new -i Deislabs.WAGI.Templates::0.8.0-preview
 
 This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.8.0-preview`.
 
+
 ``` Console
 dotnet new wagi -n hello-wagi
 ```
