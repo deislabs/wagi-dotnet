@@ -15,7 +15,7 @@ dotnet add package Deislabs.WAGI  --prerelease
 info : Adding PackageReference for package 'Deislabs.WAGI' into project '/tmp/wagiproj/WagiTest.csproj'.
 info : Restoring packages for /tmp/wagiproj/WagiTest.csproj...
 info : Package 'Deislabs.WAGI' is compatible with all the specified frameworks in project '/tmp/wagiproj/WagiTest.csproj'.
-info : PackageReference for package 'Deislabs.WAGI' version '0.8.0-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
+info : PackageReference for package 'Deislabs.WAGI' version '0.9.0-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
 info : Committing restore...
 info : Writing assets file to disk. Path: /tmp/wagiproj/obj/project.assets.json
 log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
@@ -28,14 +28,31 @@ Only released versions of the WAGI extension are availble from nuget.org, more r
 ```console
 dotnet add package Deislabs.WAGI --prerelease -s https://nuget.pkg.github.com/deislabs/index.json
 ```
+## Use the wagi-dotnet templates
 
-## Create a new ASP.Net application without using the wagi-donet templates.
+### Create a project using a locally available WAGI module
 
-To create a new, run the following command:
+```
+$ dotnet new wagi 
+The template "ASP.NET WAGI Web App" was created successfully.
+```
+
+This will create an applciation configured to use a sample WAGI module. Run `dotnet new wagi --help` to see the available options for the template.
+
+### Create a project using a WAGI Module stored in a [bindle server](https://github.com/deislabs/bindle).
+
+```
+$ dotnet new wagi-bindle --bindle-server-url <url of the bindle server> --bindle-name <name of the bindle>
+The template "ASP.NET WAGI Bindle Web App" was created successfully.
+```
+
+## Use an ASP.Net application without using the wagi-dotnet templates.
+
+To create a new application, run the following command:
 
 ```console
-$ dotnet new web
-  The template "ASP.NET Core Empty" was created successfully.
+$ dotnet new wagi 
+The template "ASP.NET WAGI Web App" was created successfully.
 
 Processing post-creation actions...
 Running 'dotnet restore' on /tmp/wagitest/wagitest.csproj...
@@ -43,8 +60,6 @@ Running 'dotnet restore' on /tmp/wagitest/wagitest.csproj...
   Restored /tmp/wagitest/wagitest.csproj (in 100 ms).
 Restore succeeded.
 ```
-
-## Add Wagi endpoint configuration to your ASP.Net application
 
 ### Modify `Startup.cs` to configure endpoints for WAGI modules.
 
@@ -90,7 +105,6 @@ to this:
 ```
 
 Calling `MapWagiModules()` maps all configured wagi modules.
-
 
 ## What's Next?
 

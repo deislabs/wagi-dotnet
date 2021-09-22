@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Simon Davies",
+    "classifications": [
+      "Web",
+      "ASP.NET",
+      "WASM",
+      "WAGI",
+      "Bindle"
+    ],
+    "identity": "Deislabs.WAGI.Templates.BindleWebApp",
+    "name": "ASP.NET WAGI Bindle Web App",
+    "shortName": "wagi-bindle",
+    "description": "Creates a new C# dotnet web app configured with the Deislabs wagi-dotnet extension configured to serve modules hosted in a bindle server.",
+    "tags": {
+      "language": "C#",
+      "type": "project"
+    },
+    "sourceName": "Wagi.Project",
+    "preferNameDirectory": true,
+    "symbols": {
+      "os": {
+        "type": "bind",
+        "binding": "OS"
+      },
+      "bindle-server-url": {
+        "type": "parameter",
+        "isRequired": true,
+        "replaces": "bindle_server_url",
+        "description": "This is URL that the bindle server is listening on"
+      },
+      "base-path": {
+        "type": "parameter",
+        "defaultValue": "/",
+        "description": "This is the base path in that the server will prepend to the routes defined in the bindle",
+        "replaces":"base_route"
+      },
+      "bindle-name": {
+        "type": "parameter",
+        "isRequired": true,
+        "replaces": "bindle_name",
+        "description": "This is name of the bindle to deploy."
+      }
+    }
+  }
