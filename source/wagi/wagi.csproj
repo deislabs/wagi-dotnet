@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Deislabs.Bindle" Version="0.1.0-preview" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0" PrivateAssets="All" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Tommy" Version="3.0.1" />
     <PackageReference Include="Wasmtime" Version="0.30.0-preview1" />
