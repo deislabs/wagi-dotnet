@@ -16,7 +16,7 @@
     <RootNamespace>Deislabs.Wagi</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
@@ -27,11 +27,6 @@
     <PackageReference Include="Tommy" Version="3.0.1" />
     <PackageReference Include="Wasmtime" Version="0.30.0-preview1" />
     <None Include="docs\readme.md" Pack="true" PackagePath="" />
-    <!-- See https://github.com/NuGet/Home/issues/10791 -->
-    <!-- The following reference can be removed once this issue is resolved. -->
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.11.0"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>
