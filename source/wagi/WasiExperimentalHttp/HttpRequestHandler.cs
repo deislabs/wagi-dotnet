@@ -9,6 +9,7 @@
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading;
+    using Deislabs.Wagi.Extensions;
     using Microsoft.Extensions.Logging;
     using Wasi.Experimental.Http.Exceptions;
     using Wasmtime;
@@ -96,7 +97,7 @@
 
         private int ReadBody(Caller caller, int handle, int bufferPtr, int bufferLength, int bufferWrittenPtr)
         {
-            this.logger.LogTrace($"ReadBody called with handle {handle}");
+            this.logger.ReadBody(handle);
             try
             {
                 var memory = GetMemory(caller);
@@ -114,7 +115,7 @@
             catch (Exception ex)
 #pragma warning restore CA1031
             {
-                this.logger.LogTrace($"Exception: {ex}");
+                this.logger.TraceException(ex);
                 return RuntimeError;
             }
         }
@@ -124,7 +125,7 @@
             var response = this.responses[handle];
             if (response == null)
             {
-                this.logger.LogTrace($"Failed to get response Handle: {handle}");
+                this.logger.InvalidHandle(handle);
                 throw new InvalidHandleException();
             }
 
@@ -134,7 +135,7 @@
         private int Close(Caller call, int handle)
         {
             {
-                this.logger.LogTrace($"Function close was called  with handle {handle}");
+                this.logger.CloseCalled(handle);
                 try
                 {
                     var response = this.GetResponse(handle);
@@ -150,7 +151,7 @@
                 catch (Exception ex)
 #pragma warning restore CA1031
                 {
-                    this.logger.LogTrace($"Exception: {ex}");
+                    this.logger.TraceException(ex);
                     return RuntimeError;
                 }
             }
@@ -158,7 +159,7 @@
 
         private int Request(Caller caller, int urlPtr, int urlLength, int methodPtr, int methodLength, int headersPtr, int headersLength, int bodyPtr, int bodyLength, int statusCodePtr, int handlePtr)
         {
-            this.logger.LogTrace("Function req was called");
+            this.logger.TraceMessage("Function req was called");
             try
             {
                 var memory = GetMemory(caller);
@@ -177,7 +178,8 @@
                 var response = new Response(httpResponseMessage);
                 this.responses.Add(handle, response);
                 memory.WriteInt32(caller, handlePtr, handle);
-                this.logger.LogTrace($"Function req created handle {handle}");
+                var message = $"Function req created handle {handle}";
+                this.logger.TraceMessage(message);
                 return OK;
             }
             catch (ExperimentalHttpException ex)
@@ -188,14 +190,14 @@
             catch (Exception ex)
 #pragma warning restore CA1031
             {
-                this.logger.LogTrace($"Exception: {ex}");
+                this.logger.TraceException(ex);
                 return RuntimeError;
             }
         }
 
         private int GetHeader(Caller caller, int handle, int namePtr, int nameLength, int valuePtr, int valueLength, int valueWrittenPtr)
         {
-            this.logger.LogTrace($"Function header_get was called with handle {handle}");
+            this.logger.TraceMessage($"Function header_get was called with handle {handle}");
             try
             {
                 var memory = GetMemory(caller);
@@ -206,12 +208,12 @@
                 }
                 catch (Exception ex)
                 {
-                    var message = $"Failed to read header  Exception: {ex.Message}";
-                    this.logger.LogTrace(message);
+                    var message = $"Failed to read header";
+                    this.logger.TraceMessage(message, ex);
                     throw new MemoryAccessException(message, ex);
                 }
 
-                this.logger.LogTrace($"header_get Header Name: {headerName}");
+                this.logger.TraceMessage($"header_get Header Name: {headerName}");
                 var response = this.GetResponse(handle);
 
                 HttpHeaders headers;
@@ -227,16 +229,15 @@
                 var headerValues = headers.Where(h => h.Key.ToUpperInvariant() == headerName.ToUpperInvariant()).Select(h => h.Value).FirstOrDefault();
                 if (headerValues == null)
                 {
-                    this.logger.LogTrace($"Failed to get Header {headerName}");
+                    this.logger.TraceMessage($"Failed to get Header {headerName}");
                 }
 
                 var headerValue = string.Join(';', headerValues);
                 var headerValueLength = headerValue.Length;
                 if (headerValueLength > valueLength)
                 {
-                    var message = $"Header Value for {headerName} Too Big. Bufffer Length {valueLength} Header Length {headerValueLength}";
-                    this.logger.LogTrace(message);
-                    throw new BufferTooSmallException(message);
+                    this.logger.BufferTooSmall(valueLength, headerValueLength);
+                    throw new BufferTooSmallException($"Header Value for {headerName} Too Big");
                 }
 
                 memory.WriteString(caller, valuePtr, headerValue);
@@ -251,14 +252,15 @@
             catch (Exception ex)
 #pragma warning restore CA1031
             {
-                this.logger.LogTrace($"Exception: {ex}");
+                this.logger.TraceException(ex);
                 return RuntimeError;
             }
         }
 
         private int GetAllHeaders(Caller caller, int handle, int bufferPtr, int bufferLength, int bufferWrittenPtr)
         {
-            this.logger.LogTrace($"Function headers_get_all was called with handle {handle}");
+            var message = $"Function header_get_all was called with handle {handle}";
+            this.logger.TraceMessage(message);
             try
             {
                 var memory = GetMemory(caller);
@@ -267,19 +269,18 @@
 
                 foreach (var header in response.HttpResponseMessage.Headers)
                 {
-                    allHeaders.AppendLine($"{header.Key}:{string.Join(';', header.Value)}");
+                    allHeaders.AppendLine(FormattableString.Invariant($"{header.Key}:{string.Join(';', header.Value)}"));
                 }
 
                 foreach (var header in response.HttpResponseMessage.Content.Headers)
                 {
-                    allHeaders.AppendLine($"{header.Key}:{string.Join(';', header.Value)}");
+                    allHeaders.AppendLine(FormattableString.Invariant($"{header.Key}:{string.Join(';', header.Value)}"));
                 }
 
                 var headerValuesLength = allHeaders.Length;
                 if (headerValuesLength > bufferLength)
                 {
-                    var message = $"Header Values for all header Too Big. Bufffer Length {bufferLength} Header Length {headerValuesLength}";
-                    this.logger.LogTrace(message);
+                    this.logger.BufferTooSmall(bufferLength, headerValuesLength);
                     throw new BufferTooSmallException(message);
                 }
 
@@ -295,7 +296,7 @@
             catch (Exception ex)
 #pragma warning restore CA1031
             {
-                this.logger.LogTrace($"Exception: {ex}");
+                this.logger.TraceException(ex);
                 return RuntimeError;
             }
         }
@@ -309,28 +310,27 @@
             }
             catch (Exception ex)
             {
-                var message = $"Failed to read url Exception: {ex.Message}";
-                this.logger.LogTrace(message);
+                var message = $"Failed to read url";
+                this.logger.TraceMessage(message, ex);
                 throw new MemoryAccessException(message, ex);
             }
 
             if (string.IsNullOrEmpty(url))
             {
-                this.logger.LogTrace("Request Url is missing");
+                this.logger.TraceMessage("Request Url is missing");
                 throw new InvalidUrlException();
             }
-
-            this.logger.LogTrace($"Request URL: {url}");
+            this.logger.TraceMessage("Request Url: {url}");
 
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
             {
-                this.logger.LogTrace($"Url {url} is invalid");
+                this.logger.TraceMessage($"Url {url} is invalid");
                 throw new InvalidUrlException();
             }
 
             if (this.allowedHosts != null && !this.allowedHosts.Select(a => a.Host.ToUpperInvariant() == uri.Host.ToUpperInvariant()).Any())
             {
-                this.logger.LogTrace($"host {uri.Host} not allowed");
+                this.logger.TraceMessage($"host {uri.Host} not allowed");
                 throw new DestinationNotAllowedException();
             }
 
@@ -346,24 +346,24 @@
             }
             catch (Exception ex)
             {
-                var message = $"Failed to read method Exception: {ex.Message}";
-                this.logger.LogTrace(message);
+                var message = $"Failed to read method";
+                this.logger.TraceMessage(message, ex);
                 throw new MemoryAccessException(message, ex);
             }
 
             if (string.IsNullOrEmpty(method))
             {
-                this.logger.LogTrace("Request Method is missing");
+                this.logger.TraceMessage("Request Method is missing");
                 throw new InvalidMethodException();
             }
 
             if (!this.allowedMethods.Contains(method.ToUpperInvariant()))
             {
-                this.logger.LogTrace($"Request Method {method} is not allowed");
+                this.logger.MethodNotAllowed(method);
                 throw new InvalidMethodException();
             }
 
-            this.logger.LogTrace($"Request Method: {method}");
+            this.logger.TraceMessage($"Request Method: {method}");
             return method;
         }
 
@@ -377,14 +377,14 @@
             }
             catch (Exception ex)
             {
-                var message = $"Failed to read headers Exception: {ex.Message}";
-                this.logger.LogTrace(message);
+                var message = "Failed to read headers";
+                this.logger.TraceMessage(message, ex);
                 throw new MemoryAccessException(message, ex);
             }
 
             if (string.IsNullOrEmpty(headersAsString))
             {
-                this.logger.LogTrace($"No Request Headers Provided");
+                this.logger.TraceMessage("No Request Headers Provided");
                 return headers;
             }
 
@@ -395,7 +395,7 @@
                 var index = line.IndexOf(':', StringComparison.InvariantCultureIgnoreCase);
                 var name = line.Substring(0, index);
                 var value = line[++index..];
-                this.logger.LogTrace($"Adding Header {name}");
+                this.logger.TraceMessage($"Adding Header {name}");
                 headers.Add(name, value);
             }
 
@@ -411,8 +411,8 @@
             }
             catch (Exception ex)
             {
-                var message = $"Failed to get request body Exception: {ex.Message}";
-                this.logger.LogTrace(message);
+                var message = "Failed to get request body Exception";
+                this.logger.TraceMessage(message, ex);
                 throw new MemoryAccessException(message, ex);
             }
 
@@ -445,8 +445,8 @@
                 }
                 catch (Exception ex)
                 {
-                    var message = $"Failed to add HTTP Header {header.Key} Exception: {ex.Message}";
-                    this.logger.LogTrace(message);
+                    var message = $"Failed to add HTTP Header {header.Key}";
+                    this.logger.TraceMessage(message, ex);
                     throw new InvalidEncodingException(message, ex);
                 }
             }
@@ -458,7 +458,7 @@
             catch (Exception ex)
             {
                 var message = $"Failed to make HTTP Request Exception: {ex.Message}";
-                this.logger.LogTrace(message);
+                this.logger.TraceMessage(message);
                 throw new RequestException(message, ex);
             }
 

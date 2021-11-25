@@ -33,27 +33,27 @@ namespace Deislabs.Wagi.Configuration
 
             if (hasModuleDefinitions && !Directory.Exists(options.ModulePath))
             {
-                result.AppendLine($"Module Path not found {options.ModulePath}");
+                result.AppendLine(FormattableString.Invariant($"Module Path not found {options.ModulePath}"));
             }
 
             if (!string.IsNullOrEmpty(options.CacheConfigPath) && !File.Exists(options.CacheConfigPath))
             {
-                result.AppendLine($"Wasmtime cache config file {options.CacheConfigPath} does not exist");
+                result.AppendLine(FormattableString.Invariant($"Wasmtime cache config file {options.CacheConfigPath} does not exist"));
             }
 
             if (!string.IsNullOrEmpty(options.BindleServer) && !Uri.TryCreate(options.BindleServer, UriKind.Absolute, out _))
             {
-                result.AppendLine($"Bindle Server is Invalid");
+                result.AppendLine(FormattableString.Invariant($"Bindle Server is Invalid"));
             }
 
             if (string.IsNullOrEmpty(options.BindleServer) && hasBindleDefinitions)
             {
-                result.AppendLine($"Bindle Server is not configured but there are bindle definitions");
+                result.AppendLine(FormattableString.Invariant($"Bindle Server is not configured but there are bindle definitions"));
             }
 
             if (options.MaxHttpRequests > HttpRequestHandler.MaxHttpRequestLimit)
             {
-                result.AppendLine($"MaxHttpRequests of {options.MaxHttpRequests} not allowed - maximum is {HttpRequestHandler.MaxHttpRequestLimit}");
+                result.AppendLine(FormattableString.Invariant($"MaxHttpRequests of {options.MaxHttpRequests} not allowed - maximum is {HttpRequestHandler.MaxHttpRequestLimit}"));
             }
 
             if (hasModuleDefinitions)
@@ -63,41 +63,41 @@ namespace Deislabs.Wagi.Configuration
                     var moduleName = module.Key;
                     if (module.Value is null)
                     {
-                        result.AppendLine($"Missing module details for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Missing module details for module name {moduleName}"));
                     }
 
                     var route = module.Value.Route;
                     if (string.IsNullOrEmpty(route))
                     {
-                        result.AppendLine($"Route should not be null or empty for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Route should not be null or empty for module name {moduleName}"));
                         return ValidateOptionsResult.Fail(result.ToString());
                     }
 
-                    if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))
+                    if (route.Contains('{', StringComparison.InvariantCulture) && route.Contains('}', StringComparison.InvariantCulture))
                     {
-                        result.AppendLine($"Route '{route}' cannot contain either {{ or }} - module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Route '{route}' cannot contain either {{ or }} - module name {moduleName}"));
                     }
 
                     if (string.IsNullOrEmpty(module.Value.FileName))
                     {
-                        result.AppendLine($"Missing module file name for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Missing module file name for module name {moduleName}"));
                     }
 
                     var moduleType = module.Value.FileName.Split('.')[^1].ToUpperInvariant();
                     if (moduleType != "WAT" && moduleType != "WASM")
                     {
-                        result.AppendLine($"Module Filename extension should be either .wat or .wasm Filename: {module.Value.FileName} for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Module Filename extension should be either .wat or .wasm Filename: {module.Value.FileName} for module name {moduleName}"));
                     }
 
                     var moduleFileAndPath = Path.Join(options.ModulePath, module.Value.FileName);
                     if (!File.Exists(moduleFileAndPath))
                     {
-                        result.AppendLine($"Module file {moduleFileAndPath} not found for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Module file {moduleFileAndPath} not found for module name {moduleName}"));
                     }
 
                     if (!string.IsNullOrEmpty(module.Value.HttpMethod) && module.Value.HttpMethod.ToUpperInvariant() != "GET" && module.Value.HttpMethod.ToUpperInvariant() != "POST")
                     {
-                        result.AppendLine($"Module HttpMethod should be either GET or POST for module name {moduleName}");
+                        result.AppendLine(FormattableString.Invariant($"Module HttpMethod should be either GET or POST for module name {moduleName}"));
                     }
 
                     if (module.Value.AllowedHosts?.Count > 0)
@@ -106,7 +106,7 @@ namespace Deislabs.Wagi.Configuration
                         {
                             if (!Uri.TryCreate(allowedHost, UriKind.Absolute, out var _))
                             {
-                                result.AppendLine($"Invalid Uri for allowed host {allowedHost} for module name {moduleName}");
+                                result.AppendLine(FormattableString.Invariant($"Invalid Uri for allowed host {allowedHost} for module name {moduleName}"));
                             }
                         }
                     }
@@ -117,7 +117,7 @@ namespace Deislabs.Wagi.Configuration
                         {
                             if (!Uri.TryCreate(hostName, UriKind.Absolute, out var _))
                             {
-                                result.AppendLine($"Invalid Uri for hostname {hostName} for module name {moduleName}");
+                                result.AppendLine(FormattableString.Invariant($"Invalid Uri for hostname {hostName} for module name {moduleName}"));
                             }
                         }
                     }
@@ -125,7 +125,7 @@ namespace Deislabs.Wagi.Configuration
                     if (CheckIfMappingExists(route, module.Value.Hostnames))
                     {
                         var hostnames = module.Value?.Hostnames is null ? "*" : string.Join(",", module.Value.Hostnames);
-                        result.AppendLine($"Attempt to associate Route '{route}' with hostnames '{hostnames}' for Module name '{moduleName}' failed, route is already mapped to one or more hosts");
+                        result.AppendLine(FormattableString.Invariant($"Attempt to associate Route '{route}' with hostnames '{hostnames}' for Module name '{moduleName}' failed, route is already mapped to one or more hosts"));
                     }
                 }
             }
@@ -138,29 +138,29 @@ namespace Deislabs.Wagi.Configuration
                     var route = bindle.Value.Route;
                     if (string.IsNullOrEmpty(route))
                     {
-                        result.AppendLine($"Route should not be null or empty for bindle {bindleName}");
+                        result.AppendLine(FormattableString.Invariant($"Route should not be null or empty for bindle {bindleName}"));
                         return ValidateOptionsResult.Fail(result.ToString());
                     }
 
-                    if (route.Contains("{", StringComparison.InvariantCulture) && route.Contains("}", StringComparison.InvariantCulture))
+                    if (route.Contains('{', StringComparison.InvariantCulture) && route.Contains('}', StringComparison.InvariantCulture))
                     {
-                        result.AppendLine($"Bindle route '{route}' cannot contain either {{ or }} for bindle {bindleName}");
+                        result.AppendLine(FormattableString.Invariant($"Bindle route '{route}' cannot contain either {{ or }} for bindle {bindleName}"));
                     }
 
                     if (hasModuleDefinitions && options.Modules.ContainsKey(bindle.Key))
                     {
-                        result.AppendLine($"Bindle '{bindleName}' is a duplciate of a Module name - names must be unique");
+                        result.AppendLine(FormattableString.Invariant($"Bindle '{bindleName}' is a duplciate of a Module name - names must be unique"));
                     }
 
                     if (string.IsNullOrEmpty(bindle.Value.Name))
                     {
-                        result.AppendLine($"Bindle Name missing for  bindle {bindleName} ");
+                        result.AppendLine(FormattableString.Invariant($"Bindle Name missing for  bindle {bindleName} "));
                     }
 
                     if (CheckIfMappingExists(route, bindle.Value.Hostnames))
                     {
                         var hostnames = bindle.Value?.Hostnames is null ? "*" : string.Join(",", bindle.Value.Hostnames);
-                        result.AppendLine($"Attempt to associate Route '{route}' with hostnames '{hostnames}' for Bindle name '{bindleName}' failed, route is already mapped to one or more hosts");
+                        result.AppendLine(FormattableString.Invariant($"Attempt to associate Route '{route}' with hostnames '{hostnames}' for Bindle name '{bindleName}' failed, route is already mapped to one or more hosts"));
                     }
                 }
             }

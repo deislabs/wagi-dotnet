@@ -29,7 +29,7 @@ namespace Deislabs.Wagi.Extensions
                 if (!Directory.Exists(volume.Value))
 #pragma warning restore CA3003
                 {
-                    logger.LogError($"Error opening Volume. {volume.Value} mapped to {volume.Key} does not exist");
+                    logger.VolumeMappingFailed(volume.Key, volume.Value);
                 }
 #pragma warning disable CA1062
                 config = config.WithPreopenedDirectory(volume.Value, volume.Key);
@@ -61,7 +61,7 @@ namespace Deislabs.Wagi.Extensions
                 catch (Exception ex)
 #pragma warning restore CA1031
                 {
-                    logger.LogError($"Failed to add environment variable {envvar.Key} Exception: {ex}");
+                    logger.AddingWasiEnvVarFailed(envvar.Key, ex);
                 }
             }
 

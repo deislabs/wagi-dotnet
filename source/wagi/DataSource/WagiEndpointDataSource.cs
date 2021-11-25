@@ -62,7 +62,7 @@ namespace Deislabs.Wagi.DataSource
             this.queue = Channel.CreateBounded<WagiModules>(options);
             this.optionsManager.OnChange<WagiModules>(async modules =>
             {
-                logger.LogTrace("Configuration OnChange called.");
+                logger.TraceMessage("Configuration OnChange called.");
                 await queue.Writer.WriteAsync(modules);
 
             });
@@ -71,7 +71,8 @@ namespace Deislabs.Wagi.DataSource
             string cacheConfig = null;
             if (!string.IsNullOrEmpty(wagiConfig.CacheConfigPath))
             {
-                logger.LogTrace($"Using {wagiConfig.CacheConfigPath} as cache configuration");
+                var message = $"Using {wagiConfig.CacheConfigPath} as cache configuration";
+                logger.TraceMessage(message);
                 cacheConfig = wagiConfig.CacheConfigPath;
             }
 
@@ -90,7 +91,7 @@ namespace Deislabs.Wagi.DataSource
             var hasBindleDefinitions = wagiConfig.Bindles?.Any() ?? default;
             if (!hasModuleDefinitions && !hasBindleDefinitions)
             {
-                logger.LogWarning("No modules found in configuration.");
+                logger.TraceWarning("No modules found in configuration.");
                 this.endpoints = new();
             }
             else
@@ -112,14 +113,15 @@ namespace Deislabs.Wagi.DataSource
                     do
                     {
                         updateCount++;
-                        logger.LogTrace($"Processing Config Change Request: {updateCount}");
+                        var message = $"Processing Config Change Request: {updateCount}";
+                        logger.TraceMessage(message);
 
                         // This is to deal with the fact that the change event fires multiple times for one change. We only care about one (the last one).
                         Thread.Sleep(500);
                         moreUpdates = queue.Reader.TryRead(out var updateModules);
                         if (moreUpdates)
                         {
-                            logger.LogTrace("Found another update, will wait for 500 milliseconds to see if it is the last one.");
+                            logger.TraceMessage("Found another update, will wait for 500 milliseconds to see if it is the last one.");
                             modules = updateModules;
                         }
 
@@ -190,7 +192,7 @@ namespace Deislabs.Wagi.DataSource
                         var routes = await GetRouteDetails(wasmModule);
                         foreach (var moduleRoutes in routes)
                         {
-                            logger.LogTrace($"Adding module defined route: {moduleRoutes.route} EntryPoint: {moduleRoutes.entryPoint}");
+                            logger.AddingModuleDefinedRoute(moduleRoutes.route, moduleRoutes.entryPoint);
                             var resultantName = $"{name}/{moduleRoutes.route}".Replace("//", "/", StringComparison.InvariantCulture);
                             var resultantOriginalRoute = $"{originalRoute.Trim('.')}/{moduleRoutes.route.TrimStart('/')}".Replace("//", "/", StringComparison.InvariantCulture);
                             var resultantRoute = CheckForWildcardRoute(resultantOriginalRoute);
@@ -200,7 +202,7 @@ namespace Deislabs.Wagi.DataSource
                             });
                             endPoint = endPointBuilder.Build();
                             endpoints.Add(endPoint);
-                            logger.LogTrace($"Route: {moduleRoutes.route} EntryPoint: {moduleRoutes.entryPoint}");
+                            logger.AddedRoute(moduleRoutes.route, moduleRoutes.entryPoint);
                         }
                     }
                 }
@@ -208,7 +210,7 @@ namespace Deislabs.Wagi.DataSource
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    logger.LogError($"Adding module defined route for Module Definition:{name} Failed - skipping", ex);
+                    logger.FailedToAddModuleDefinedRoute(name, ex);
                 }
             }
 
@@ -250,14 +252,14 @@ namespace Deislabs.Wagi.DataSource
             if (originalRoute.EndsWith("/...", StringComparison.InvariantCulture))
             {
                 route = $"{originalRoute.TrimEnd('.')}{{**path}}";
-                logger.LogTrace($"Mapped Wildcard Route: {originalRoute} to {route}");
+                logger.MappedWildcard(originalRoute, route);
             }
             return route;
         }
 
         private EndpointBuilder GetEndpointBuilder(string name, string route, string moduleFileAndPath, WagiModuleInfo wagiModuleInfo, string entryPoint, string hostnames, string originalRoute, RequestDelegate requestDelegate)
         {
-            logger.LogTrace($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {entryPoint ?? "Default"} Route:{route} Hostnames: {hostnames}");
+            logger.TraceMessage($"Adding Route Endpoint for Module: {name} File: {moduleFileAndPath} Entrypoint: {entryPoint ?? "Default"} Route:{route} Hostnames: {hostnames}");
             var pattern = RoutePatternFactory.Parse(route);
             var endPointBuilder = new RouteEndpointBuilder(requestDelegate, pattern, 1);
             foreach (var convention in this.conventions)

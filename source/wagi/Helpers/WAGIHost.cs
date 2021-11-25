@@ -100,7 +100,7 @@ namespace Deislabs.Wagi.Helpers
                     entrypoint.Invoke(store);
                     stopWatch.Stop();
                     var elapsed = stopWatch.Elapsed;
-                    this.logger.LogTrace($"Call Module {this.wasmFile} Function {this.entryPoint} Complete in {elapsed.TotalSeconds:00}.{elapsed.Milliseconds:000}{((elapsed.Ticks) / 10 % 1000):000} seconds");
+                    this.logger.ModuleExecutionTime(this.wasmFile, this.entryPoint, elapsed.TotalSeconds, elapsed.Milliseconds, elapsed.Ticks);
                 }
                 catch (WasmtimeException ex)
                 {
@@ -119,7 +119,7 @@ namespace Deislabs.Wagi.Helpers
             string line;
             while ((line = await errreader.ReadLineAsync()) != null)
             {
-                this.logger.LogWarning($"stderr output from Module {this.wasmFile} Function {this.entryPoint}. Output:{line.TrimEnd('\0')}");
+                this.logger.ModuleWroteToStdErr(this.wasmFile, this.entryPoint, line.TrimEnd('\0'));
             }
 
             await this.ProcessOutput(stdout.Path);
@@ -295,7 +295,7 @@ namespace Deislabs.Wagi.Helpers
                         {
                             statusCode = Convert.ToInt32(headerValue.Split(" ")[0], CultureInfo.InvariantCulture);
                             reason = headerValue.Split(" ")[1];
-                            logger.LogTrace($"Ignoring Reason {reason}");
+                            logger.TraceMessage($"Ignoring Reason {reason}");
                         }
                         else
                         {

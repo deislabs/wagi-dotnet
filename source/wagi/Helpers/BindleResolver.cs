@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Deislabs.Bindle;
 using Deislabs.Wagi.Configuration;
+using Deislabs.Wagi.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Deislabs.Wagi.Helpers
@@ -42,36 +43,37 @@ namespace Deislabs.Wagi.Helpers
             {
                 var bindleInfo = bindle.Value;
                 var name = bindle.Key;
-                logger.LogTrace($"Processing Bindle {bindleInfo.Name} from Server {this.wagiModules.BindleServer} with name '{name}'.");
+                var message = $"Processing Bindle {bindleInfo.Name} from Server {this.wagiModules.BindleServer} with name '{name}'.";
+                logger.TraceMessage(message);
                 var bindleClient = new BindleClient(this.wagiModules.BindleServer);
                 var invoice = await bindleClient.GetInvoice(bindleInfo.Name);
                 var parcels = invoice.Parcels.Where(p => p.Label.MediaType == "application/wasm" && p.Conditions.MemberOf.Count == 0);
                 foreach (var parcel in parcels)
                 {
-                    logger.LogTrace($"Processing Parcel {parcel.Label.Name} with SHA256 {parcel.Label.Sha256}.");
+                    logger.TraceMessage($"Processing Parcel {parcel.Label.Name} with SHA256 {parcel.Label.Sha256}.");
                     var modulePath = GetAssetCacheDirectory(this.wagiModules.ModulePath, parcel.Label.Sha256);
                     var routeSuffix = parcel.Label.Feature.ContainsKey("Route") ? parcel.Label.Feature["Route"].Values.FirstOrDefault() : "/";
                     var route = routeSuffix == "/" ? bindleInfo.Route : Path.Join(bindleInfo.Route, routeSuffix);
                     var moduleInfo = await GetModuleInfo(parcel, modulePath, bindleInfo.Environment, bindleInfo.Name, bindleClient, bindleInfo.Hostnames, route);
-                    logger.LogTrace($"Creating route with prefix '{bindleInfo.Route}' and suffix '{routeSuffix}'.");
+                    logger.TraceMessage($"Creating route with prefix '{bindleInfo.Route}' and suffix '{routeSuffix}'.");
                     try
                     {
                         this.wagiModules.Modules.Add(name, moduleInfo);
                     }
                     catch (ArgumentException ex)
                     {
-                        logger.LogError($"Attempt to add module Failed. : {ex}");
-                        logger.LogError($"Skipping loading {name} for bindle {bindleInfo.Name} from server {this.wagiModules.BindleServer}.");
+                        logger.TraceMessage("Attempt to add module Failed", ex);
+                        logger.TraceMessage($"Skipping loading {name} for bindle {bindleInfo.Name} from server {this.wagiModules.BindleServer}.");
                     }
 
                     foreach (var group in parcel.Conditions.Requires)
                     {
-                        logger.LogTrace($"Processing Group {group}.");
+                        logger.TraceMessage($"Processing Group {group}.");
                         var assetCachePath = GetAssetCacheDirectory(modulePath, bindleInfo.Name);
                         var members = invoice.Parcels.Where(p => p.Conditions.MemberOf.Contains(group));
                         foreach (var member in members)
                         {
-                            logger.LogTrace($"Processing Member {member.Label.Name}.");
+                            logger.TraceMessage($"Processing Member {member.Label.Name}.");
                             var file = member.Label.Feature["wagi"].Where(f => f.Key == "file").Select(kvp => kvp.Value).FirstOrDefault();
                             if (!string.IsNullOrEmpty(file))
                             {
@@ -110,7 +112,7 @@ namespace Deislabs.Wagi.Helpers
         {
             var path = Path.Join(basePath, directory);
             Directory.CreateDirectory(path);
-            logger.LogTrace($"Creating Directory {path}.");
+            logger.CreatedDirectory(path);
             return path;
         }
 
@@ -129,19 +131,19 @@ namespace Deislabs.Wagi.Helpers
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(parcelFileCachePath));
                 var parcelBytes = await GetParcel(bindleName, parcelId, bindleClient);
-                logger.LogTrace($"Writing File {parcelFileCachePath}.");
+                logger.TraceMessage($"Writing File {parcelFileCachePath}.");
                 await File.WriteAllBytesAsync(parcelFileCachePath, parcelBytes);
             }
             // The file should not ever exist but it does not matter if it is overwritten.
             // This may need revising when dynamic updates are supported.
             // TODO dont copy the file if it already exists and is not changed (it should be immutable)
-            logger.LogTrace($"Copying Cached File {parcelFileCachePath} to {parcelFileModulePath}.");
+            logger.TraceMessage($"Copying Cached File {parcelFileCachePath} to {parcelFileModulePath}.");
             File.Copy(parcelFileCachePath, parcelFileModulePath, true);
         }
 
         private async Task<byte[]> GetParcel(string invoiceId, string parcelId, BindleClient bindleClient)
         {
-            logger.LogTrace($"Downloading Parcel with InoviceId {invoiceId} ParcelId {parcelId}.");
+            logger.DownloadingParcel(invoiceId, parcelId);
             using var content = await bindleClient.GetParcel(invoiceId, parcelId);
             return await content.ReadAsByteArrayAsync();
         }
