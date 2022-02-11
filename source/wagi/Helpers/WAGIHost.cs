@@ -41,8 +41,8 @@ namespace Deislabs.Wagi.Helpers
         private readonly string wasmFile;
         private readonly List<Uri> allowedHosts;
         private readonly IModuleResolver moduleResolver;
-
         private readonly int maxHttpRequests;
+        private string pathInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WagiHost"/> class.
@@ -201,6 +201,7 @@ namespace Deislabs.Wagi.Helpers
                 pathInfo = req.Path.Value.Length >= routePrefix.Length ? req.Path.Value.Remove(0, routePrefix.Length) : string.Empty;
             }
 
+            this.pathInfo = pathInfo;
             environmentVariables.Add(("PATH_INFO", pathInfo));
             environmentVariables.Add(("PATH_TRANSLATED", pathInfo));
 
@@ -224,8 +225,8 @@ namespace Deislabs.Wagi.Helpers
 
         private string[] GetArgs()
         {
-            var args = this.context.Request.QueryString.Value.Length > 0 ? this.context.Request.QueryString.Value.TrimStart('?').Split("&") : Array.Empty<string>();
-            return args
+            string[] args = { this.pathInfo };
+            return args.Concat(this.context.Request.QueryString.Value.Length > 0 ? this.context.Request.QueryString.Value.TrimStart('?').Split("&") : Array.Empty<string>())
               .Select(a => UrlDecode(a))
               .ToArray();
         }
