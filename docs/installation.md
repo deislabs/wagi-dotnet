@@ -15,7 +15,7 @@ dotnet add package Deislabs.WAGI  --prerelease
 info : Adding PackageReference for package 'Deislabs.WAGI' into project '/tmp/wagiproj/WagiTest.csproj'.
 info : Restoring packages for /tmp/wagiproj/WagiTest.csproj...
 info : Package 'Deislabs.WAGI' is compatible with all the specified frameworks in project '/tmp/wagiproj/WagiTest.csproj'.
-info : PackageReference for package 'Deislabs.WAGI' version '0.9.0-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
+info : PackageReference for package 'Deislabs.WAGI' version '0.10.1-preview' updated in file '/tmp/wagiproj/WagiTest.csproj'.
 info : Committing restore...
 info : Writing assets file to disk. Path: /tmp/wagiproj/obj/project.assets.json
 log  : Restored /tmp/wagiproj/WagiTest.csproj (in 155 ms).
