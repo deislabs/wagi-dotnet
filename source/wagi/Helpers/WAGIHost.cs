@@ -7,15 +7,16 @@ namespace Deislabs.Wagi.Helpers
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
+    using System.IO.Pipelines;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Deislabs.Wagi.DataSource;
     using Deislabs.Wagi.Extensions;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
@@ -250,30 +251,54 @@ namespace Deislabs.Wagi.Helpers
             var headers = new List<string>();
             var responseBuilder = new StringBuilder();
             var sufficientResponse = false;
-            var endofHeaders = false;
             var statusCode = 200;
             var contentType = string.Empty;
             var reason = string.Empty;
             using var stdoutStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using var reader = new StreamReader(stdoutStream);
-            string line;
-            while ((line = await reader.ReadLineAsync()) != null)
+            var buffer = new byte[1024];
+            int c;
+            var last = 0;
+            var position = 0;
+
+            //TODO: make this more efficient
+            // Find the headers.
+            while ((c = stdoutStream.ReadByte()) != -1)
             {
-                if (endofHeaders)
+                if (c == 10)
                 {
-                    responseBuilder.AppendLine(line.TrimEnd('\0'));
+                    // two newlines in a row, means headers are finished and the rest of the output (if any) is the response body.
+                    if (last == 10)
+                    {
+                        break;
+                    }
+
+                    // Remove any CR
+
+                    var header = Encoding.UTF8.GetString(buffer, 0, position).TrimEnd();
+
+                    // The header string might now be empty, if so skip it.
+
+                    if (header.Length > 0)
+                    {
+                        headers.Add(header);
+                    }
+                    position = 0;
                 }
                 else
                 {
-                    if (line.Length == 0)
+                    if (position == buffer.Length)
                     {
-                        endofHeaders = true;
+                        throw new InvalidOperationException("Response Header too long");
                     }
-                    else
+
+                    // Ignore null characters.
+
+                    if (c != 0)
                     {
-                        headers.Add(line.TrimEnd('\0'));
+                        buffer[position++] = (byte)c;
                     }
                 }
+                last = c;
             }
 
             headers.ForEach(header =>
@@ -323,9 +348,9 @@ namespace Deislabs.Wagi.Helpers
 
             this.context.Response.StatusCode = statusCode;
 
-            if (responseBuilder.Length > 0)
+            if (stdoutStream.Position < stdoutStream.Length)
             {
-                await this.context.Response.WriteAsync(responseBuilder.ToString());
+                await stdoutStream.CopyToAsync(this.context.Response.Body).ConfigureAwait(false);
             }
         }
 
