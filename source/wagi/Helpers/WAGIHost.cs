@@ -7,15 +7,16 @@ namespace Deislabs.Wagi.Helpers
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
+    using System.IO.Pipelines;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Deislabs.Wagi.DataSource;
     using Deislabs.Wagi.Extensions;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
@@ -250,66 +251,100 @@ namespace Deislabs.Wagi.Helpers
             var headers = new List<string>();
             var responseBuilder = new StringBuilder();
             var sufficientResponse = false;
-            var endofHeaders = false;
             var statusCode = 200;
             var contentType = string.Empty;
             var reason = string.Empty;
             using var stdoutStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using var reader = new StreamReader(stdoutStream);
-            string line;
-            while ((line = await reader.ReadLineAsync()) != null)
+            var headerBuffer = new byte[1024];
+            var inputBuffer = new byte[1024];
+            var lastByte = 0;
+            var streamPosition = 0;
+            var bytesRead = 0;
+            var moreHeaders = true;
+            var headerBufferPosition = 0;
+
+            // Find the headers.
+            while ((bytesRead = await stdoutStream.ReadAsync(inputBuffer.AsMemory(0, inputBuffer.Length))) != -1 && moreHeaders)
             {
-                if (endofHeaders)
+                for (var i = 0; i < bytesRead; i++)
                 {
-                    responseBuilder.AppendLine(line.TrimEnd('\0'));
-                }
-                else
-                {
-                    if (line.Length == 0)
+                    streamPosition++;
+                    if (inputBuffer[i] == 10)
                     {
-                        endofHeaders = true;
+                        // two newlines in a row, means headers are finished and the rest of the output (if any) is the response body.
+
+                        if (lastByte == 10)
+                        {
+                            moreHeaders = false;
+                            break;
+                        }
+
+                        // Remove any CR
+
+                        var header = Encoding.UTF8.GetString(headerBuffer, 0, headerBufferPosition).TrimEnd();
+
+                        // The header string might now be empty, if so skip it.
+
+                        if (header.Length > 0)
+                        {
+                            headers.Add(header);
+                        }
+
+                        headerBufferPosition = 0;
                     }
                     else
                     {
-                        headers.Add(line.TrimEnd('\0'));
+                        if (headerBufferPosition == headerBuffer.Length)
+                        {
+                            throw new InvalidOperationException("Response Header too long");
+                        }
+
+                        // Ignore null characters.
+
+                        if (inputBuffer[i] != 0)
+                        {
+                            headerBuffer[headerBufferPosition++] = inputBuffer[i];
+                        }
                     }
+                    lastByte = inputBuffer[i];
                 }
+
             }
 
             headers.ForEach(header =>
-            {
-                switch (header)
                 {
-                    case var _ when header.StartsWith("location:", StringComparison.InvariantCultureIgnoreCase):
-                        this.AddHeader("Location", new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
-                        sufficientResponse = true;
-                        break;
-                    case var _ when header.StartsWith("content-type:", StringComparison.InvariantCultureIgnoreCase):
-                        var val = header.Split(':')[1]?.TrimStart();
-                        this.AddHeader("Content-Type", new StringValues(val));
-                        contentType = val;
-                        sufficientResponse = true;
-                        break;
-                    case var _ when header.StartsWith("status:", StringComparison.InvariantCultureIgnoreCase):
-                        var headerValue = header.Split(':')[1].TrimStart();
-                        if (headerValue.Contains(' ', StringComparison.InvariantCulture))
-                        {
-                            statusCode = Convert.ToInt32(headerValue.Split(" ")[0], CultureInfo.InvariantCulture);
-                            reason = headerValue.Split(" ")[1];
-                            logger.TraceMessage($"Ignoring Reason {reason}");
-                        }
-                        else
-                        {
-                            statusCode = Convert.ToInt32(headerValue, CultureInfo.InvariantCulture);
-                        }
+                    switch (header)
+                    {
+                        case var _ when header.StartsWith("location:", StringComparison.InvariantCultureIgnoreCase):
+                            this.AddHeader("Location", new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
+                            sufficientResponse = true;
+                            break;
+                        case var _ when header.StartsWith("content-type:", StringComparison.InvariantCultureIgnoreCase):
+                            var val = header.Split(':')[1]?.TrimStart();
+                            this.AddHeader("Content-Type", new StringValues(val));
+                            contentType = val;
+                            sufficientResponse = true;
+                            break;
+                        case var _ when header.StartsWith("status:", StringComparison.InvariantCultureIgnoreCase):
+                            var headerValue = header.Split(':')[1].TrimStart();
+                            if (headerValue.Contains(' ', StringComparison.InvariantCulture))
+                            {
+                                statusCode = Convert.ToInt32(headerValue.Split(" ")[0], CultureInfo.InvariantCulture);
+                                reason = headerValue.Split(" ")[1];
+                                logger.TraceMessage($"Ignoring Reason {reason}");
+                            }
+                            else
+                            {
+                                statusCode = Convert.ToInt32(headerValue, CultureInfo.InvariantCulture);
+                            }
 
-                        sufficientResponse = true;
-                        break;
-                    default:
-                        this.AddHeader(header.Split(':')[0], new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
-                        break;
-                }
-            });
+                            sufficientResponse = true;
+                            break;
+                        default:
+                            this.AddHeader(header.Split(':')[0], new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
+                            break;
+                    }
+                });
 
             if (!sufficientResponse)
             {
@@ -323,9 +358,10 @@ namespace Deislabs.Wagi.Helpers
 
             this.context.Response.StatusCode = statusCode;
 
-            if (responseBuilder.Length > 0)
+            if (streamPosition < stdoutStream.Length)
             {
-                await this.context.Response.WriteAsync(responseBuilder.ToString());
+                stdoutStream.Seek(streamPosition, SeekOrigin.Begin);
+                await stdoutStream.CopyToAsync(this.context.Response.Body).ConfigureAwait(false);
             }
         }
 
