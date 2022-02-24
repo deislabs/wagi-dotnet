@@ -33,10 +33,10 @@ To create a ASP.Net Core web application that host a demo WAGI Module:
 ***Note: nuget.org only contains (pre-)released versions of the packages, to install the latest versions follow the instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry) to set up GitHub packages registry as a source for nuget packages.***
 
 ``` Console
-dotnet new -i Deislabs.WAGI.Templates::0.11.0-preview
+dotnet new -i Deislabs.WAGI.Templates::0.11.1-preview
 ```
 
-This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.11.0-preview`.
+This will add the dotnet wagi templates. To install pre-release versions of the templates the version of the template package must be provided as a suffix to the package name as show above `::0.11.1-preview`.
 
 ``` Console
 dotnet new wagi -n hello-wagi
