@@ -264,7 +264,7 @@ namespace Deislabs.Wagi.Helpers
             var headerBufferPosition = 0;
 
             // Find the headers.
-            while ((bytesRead = await stdoutStream.ReadAsync(inputBuffer.AsMemory(0, inputBuffer.Length))) != -1 && moreHeaders)
+            while ((bytesRead = await stdoutStream.ReadAsync(inputBuffer.AsMemory(0, inputBuffer.Length))) != 0 && moreHeaders)
             {
                 for (var i = 0; i < bytesRead; i++)
                 {
