@@ -120,6 +120,15 @@ namespace Deislabs.Wagi.Configuration.Modules.Toml
                         data[$"{moduleKeyPrefix}:maxhttprequests"] = entrypoint.AsString.Value;
                     }
 
+                    if (moduleNode.TryGetNode("argv", out var argv))
+                    {
+                        if (!argv.IsString)
+                        {
+                            throw new InvalidDataException("Value for argv should be a string");
+                        }
+                        data[$"{moduleKeyPrefix}:argv"] = argv.AsString.Value;
+                    }
+
                 }
 
             }

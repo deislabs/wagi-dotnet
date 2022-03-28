@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "source", "source", "{BCE00700-705C-4B3A-902B-3356DCD3DA3E}"
 EndProject
@@ -33,13 +33,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wildcard", "examples\wildca
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wildcard.test", "examples\wildcard.test\wildcard.test.csproj", "{768B1623-DD53-42DD-96FA-FE0729B9CBBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "routes", "examples\routes\routes.csproj", "{2EF91649-F49E-4720-8702-613B7E0C3D0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "routes", "examples\routes\routes.csproj", "{2EF91649-F49E-4720-8702-613B7E0C3D0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "routes.test", "examples\routes.test\routes.test.csproj", "{AC2A6E41-407C-4DA6-9526-96575BC9D960}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "routes.test", "examples\routes.test\routes.test.csproj", "{AC2A6E41-407C-4DA6-9526-96575BC9D960}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "modules.toml", "examples\modules.toml\modules.toml.csproj", "{B92462FD-129B-47CD-A3DB-4502215136A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "modules.toml.test", "examples\modules.toml.test\modules.toml.test.csproj", "{EBD602E8-6212-4F02-99DA-63758F33AC74}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wagi-python", "examples\wagi-python\wagi-python.csproj", "{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -255,6 +257,18 @@ Global
 		{EBD602E8-6212-4F02-99DA-63758F33AC74}.Release|x64.Build.0 = Release|Any CPU
 		{EBD602E8-6212-4F02-99DA-63758F33AC74}.Release|x86.ActiveCfg = Release|Any CPU
 		{EBD602E8-6212-4F02-99DA-63758F33AC74}.Release|x86.Build.0 = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Debug|x86.Build.0 = Debug|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|x64.Build.0 = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,6 +291,7 @@ Global
 		{AC2A6E41-407C-4DA6-9526-96575BC9D960} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{B92462FD-129B-47CD-A3DB-4502215136A8} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{EBD602E8-6212-4F02-99DA-63758F33AC74} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
+		{22A8C207-35FD-4D4E-ACD1-6B92A8DAF2E9} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF3895D-74E4-4CEC-8C19-CF93A06D9F0A}

@@ -24,10 +24,11 @@ namespace Deislabs.Wagi.Extensions
         /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
         /// <param name="allowedHosts">The hosts that the module is allowed to connect to.</param>
         /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
-        public static async Task RunWAGIRequest(this HttpContext context, string wasmFile, IHttpClientFactory httpClientFactory, string entryPoint, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
+        /// <param name="argv">Override for argv passed to module.</param>
+        public static async Task RunWAGIRequest(this HttpContext context, string wasmFile, IHttpClientFactory httpClientFactory, string entryPoint, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests, string argv)
         {
 #pragma warning disable CA1062
-            var wagiHost = new WagiHost(context, httpClientFactory, entryPoint, wasmFile, moduleResolver, volumes, environment, allowedHosts, maxHttpRequests);
+            var wagiHost = new WagiHost(context, httpClientFactory, entryPoint, wasmFile, moduleResolver, volumes, environment, allowedHosts, maxHttpRequests, argv);
 #pragma warning restore CA1062
             await wagiHost.ProcessRequest();
         }

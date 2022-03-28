@@ -20,6 +20,7 @@ namespace Deislabs.Wagi.Helpers
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
+    using Microsoft.Win32;
     using Wasi.Experimental.Http;
     using Wasmtime;
 
@@ -44,6 +45,7 @@ namespace Deislabs.Wagi.Helpers
         private readonly IModuleResolver moduleResolver;
         private readonly int maxHttpRequests;
         private string pathInfo;
+        private readonly string argv;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WagiHost"/> class.
@@ -57,7 +59,8 @@ namespace Deislabs.Wagi.Helpers
         /// <param name="environment">The environment variables to be added to the WasiConfiguration.</param>
         /// <param name="allowedHosts">A set of allowedHosts (hostnames) that the module can send HTTP requests to.</param>
         /// <param name="maxHttpRequests">The maximum number of HTTP Requests that the module can make.</param>
-        public WagiHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests)
+        /// <param name="argv">Override for argv passed to module.</param>
+        public WagiHost(HttpContext context, IHttpClientFactory httpClientFactory, string entryPoint, string wasmFile, IModuleResolver moduleResolver, IDictionary<string, string> volumes, IDictionary<string, string> environment, List<Uri> allowedHosts, int maxHttpRequests, string argv)
         {
             this.context = context;
             this.httpClientFactory = httpClientFactory;
@@ -71,6 +74,7 @@ namespace Deislabs.Wagi.Helpers
             this.allowedHosts = allowedHosts;
             this.maxHttpRequests = maxHttpRequests;
             this.moduleResolver = moduleResolver;
+            this.argv = argv;
         }
 
         /// <summary>
@@ -226,10 +230,18 @@ namespace Deislabs.Wagi.Helpers
 
         private string[] GetArgs()
         {
-            string[] args = { this.pathInfo };
-            return args.Concat(this.context.Request.QueryString.Value.Length > 0 ? this.context.Request.QueryString.Value.TrimStart('?').Split("&") : Array.Empty<string>())
-              .Select(a => UrlDecode(a))
-              .ToArray();
+            if (this.argv == null)
+            {
+                string[] args = { this.pathInfo };
+                return args.Concat(this.context.Request.QueryString.Value.Length > 0 ? this.context.Request.QueryString.Value.TrimStart('?').Split("&") : Array.Empty<string>())
+                  .Select(a => UrlDecode(a))
+                  .ToArray();
+            }
+
+            var script = this.pathInfo;
+            var queryStringArgs = this.context.Request.QueryString.Value.TrimStart('?').Replace('&', ' ');
+            var argString = this.argv.Replace("${SCRIPT}", script, StringComparison.InvariantCultureIgnoreCase).Replace("${ARGS}", queryStringArgs, StringComparison.InvariantCultureIgnoreCase).TrimEnd();
+            return argString.Split(' ');
         }
 
         private async Task<string> GetInput()

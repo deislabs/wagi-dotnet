@@ -1,0 +1,5 @@
+[[module]]
+route = "/"
+module = "opt/wasi-python/bin/python3.wasm"
+volumes = { "/code" = "code", "/opt" = "opt" }
+argv = "python /code/env.py ${ARGS}"

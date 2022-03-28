@@ -30,6 +30,13 @@ namespace Deislabs.Wagi.Configuration
         public string Entrypoint { get; set; }
 
         /// <summary>
+        /// Gets or Sets the Arg value, if unset defaults to {SCIPT_NAME} ${ARGS}.
+        /// This is used to override the value passed to a WASM module and is useful for passing in the script name and arguments 
+        /// to modules that require specifically formatted values e.g. Ruby
+        /// </summary>
+        public string Argv { get; set; }
+
+        /// <summary>
         /// Gets or Sets any volumes to be given to the WASM function.
         /// </summary>
         public Dictionary<string, string> Volumes { get; set; }

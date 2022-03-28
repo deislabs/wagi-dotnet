@@ -1,0 +1,20 @@
+spin_version = "1"
+
+name = "spin-ruby"
+version = "1.0.0"
+description = "A demo of ruby on spin"
+authors = ["Adam Reese <adam.reese@fermyon.com>"]
+trigger = { type = "http", base = "/" }
+
+[[component]]
+files = [
+  { source = "lib", destination = "/" },
+  { source = "ruby-wasm32-wasi/usr", destination = "/usr" },
+]
+id = "ruby"
+source = "ruby.wasm"
+[component.trigger]
+executor = { type = "wagi", argv = "${SCRIPT_NAME} -v /env.rb ${SCRIPT_NAME} ${ARGS}" }
+route = "/..."
+[component.environment]
+GEM_HOME = "/.gem"

@@ -161,6 +161,7 @@ namespace Deislabs.Wagi.DataSource
                 var moduleFileAndPath = Path.Join(modules.ModulePath, fileName);
                 var moduleType = fileName.Split('.')[1].ToUpperInvariant();
                 var httpMethod = GetHTTPMethod(wagiModuleInfo.HttpMethod);
+                var argv = wagiModuleInfo.Argv;
                 var allowedHosts = new List<Uri>();
                 if (wagiModuleInfo.AllowedHosts?.Count > 0)
                 {
@@ -175,7 +176,7 @@ namespace Deislabs.Wagi.DataSource
 
                 var endPointBuilder = GetEndpointBuilder(name, route, moduleFileAndPath, wagiModuleInfo, wagiModuleInfo.Entrypoint, hostnames, originalRoute, async context =>
                 {
-                    await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, wagiModuleInfo.Entrypoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests);
+                    await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, wagiModuleInfo.Entrypoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests, argv);
                 });
                 var endPoint = endPointBuilder.Build();
                 endpoints.Add(endPoint);
@@ -198,7 +199,7 @@ namespace Deislabs.Wagi.DataSource
                             var resultantRoute = CheckForWildcardRoute(resultantOriginalRoute);
                             endPointBuilder = GetEndpointBuilder(resultantName, resultantRoute, moduleFileAndPath, wagiModuleInfo, moduleRoutes.entryPoint, hostnames, resultantOriginalRoute, async context =>
                             {
-                                await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, moduleRoutes.entryPoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests);
+                                await context.RunWAGIRequest(moduleFileAndPath, this.httpClientFactory, moduleRoutes.entryPoint, moduleResolver.Value, wagiModuleInfo.Volumes, wagiModuleInfo.Environment, allowedHosts, maxHttpRequests, argv);
                             });
                             endPoint = endPointBuilder.Build();
                             endpoints.Add(endPoint);
