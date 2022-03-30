@@ -103,6 +103,7 @@ namespace Deislabs.Wagi.Helpers
                 FileName = Path.Join(label.Sha256, label.Name),
                 Entrypoint = label.Feature.ContainsKey("entrypoint") ? label.Feature["entrypoint"].Values.FirstOrDefault() : null,
                 AllowedHosts = label.Feature.ContainsKey("allowed_hosts") ? new Collection<string>(label.Feature["allowed_hosts"]?.Values.ToList<string>()) : new Collection<string>(),
+                Argv = label.Feature.ContainsKey("argv") ? label.Feature["argv"].Values.FirstOrDefault() : null,
                 Environment = env,
                 Hostnames = hostnames,
                 Route = route

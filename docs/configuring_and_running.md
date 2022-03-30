@@ -67,6 +67,15 @@ Example Configuration:
           "https://host.example.com"
         },
         "MaxHttpRequests": 50
+      },
+      "rubywasm": {
+        "FileName": "ruby.wasm",
+        "Volumes": {
+          "/": "wagi-ruby/lib",
+          "/usr": "wagi-ruby/ruby-wasm32-wasi/usr"
+        },
+          "Route": "/",
+          "argv": "ruby -v /env.rb ${ARGS}"
       }
     }
     "Bindles" :{
@@ -102,6 +111,7 @@ Configuration for the extension is defined in a configuration section which is n
     - `Policies` : An array of policies that the user must satisfy to in order to access the module.
     - `AllowedHosts` : An array of hostnames that a module using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) can make, only hostnames in this array can be accessed by the module.
     - `MaxHttpRequests`: Sets the maximum number of HTTP Requests this module can make using [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http). If not present defaults to `MaxHttpRequests` specified in `WASM` configuration, must be a value between 1 and 500.
+    - `Argv` allows the control of the Args passed to the module. The placeholders ${script_name} and ${args} are replaced with the path query string arguments. For example if the value of this configuration item is "ruby ${script_name} ${args}" then the url `/ruby/hello.rb?name=world` would result in argv passed to the module being `ruby hello.rb name=world`. 
   - `Bindles` : Bindles is a key value pair object where each item defines a [bindle](https://github.com/deislabs/bindle) hosted at `BindleServer`  to be exposed by the server. Like the `Modules` property the *key* is a logical name for the bindle and the *value* is a Bindle Object.
     - Bindle Object Fields
       - `Name` (REQUIRED): The Name of the bindle to be loaded from the bindle server.
