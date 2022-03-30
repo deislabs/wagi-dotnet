@@ -14,7 +14,7 @@ namespace WagiRuby.Test
         {
             factory = new WebApplicationFactory<Startup>();
         }
-        [Fact]
+        [FactSkipIfWindowsAttribute]
         public async Task TestInvokeWagi()
         {
             var client = factory.CreateClient();
