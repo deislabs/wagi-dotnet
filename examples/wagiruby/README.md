@@ -1,8 +1,12 @@
 # Example of running Ruby as a WAGI Module
 
+NOTE: This example does not yet run on Windows due to a missing feature in wasmtime.
+
 This contents in wagi-ruby is a copy of the WAGI-Ruby example by [Fermyon](https://www.fermyon.com/) from [this GitHub repo.](https://github.com/fermyon/wagi-ruby.)
 
-This example exposes a ruby script as a route endpoint in ASP.Net Core.
+The configuration for running the module is in the `appsettings.json` file, it does not use `modules.toml` from `wagi-ruby`.
+
+The example exposes ruby as a route endpoint in ASP.Net Core, the script that is run is specified in the argv property in the configuration, args are appended to the command passed to ruby.
 
 To run the example clone the repo, switch to the local folder and then run:
 
@@ -15,7 +19,7 @@ This starts a ASP.Net Core Web application WAGI host on port 8080.
 Use a browser or a tool like `curl` to test:
 
 ``` Console
-$ curl -v http://127.0.0.1:8080?env.rb
+$ curl -v 'http://localhost:8080/?1&2&3&4'
 *   Trying 127.0.0.1:8080...
 * TCP_NODELAY set
 * Connected to 127.0.0.1 (127.0.0.1) port 8080 (#0)
@@ -38,6 +42,10 @@ ruby version: 3.2.0 (2022-02-10) [wasm32-wasi]
 
 ### Arguments ###
 
+arg 0: 1
+arg 1: 2
+arg 2: 3
+arg 3: 4
 
 ### Env Vars ###
 

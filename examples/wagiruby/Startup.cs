@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Deislabs.Wagi.Extensions;
 
-namespace wagidotnetruby
+namespace WagiRuby
 {
     public class Startup
     {

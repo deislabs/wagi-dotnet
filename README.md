@@ -96,6 +96,10 @@ dotnet build -c Release
 - [simplehttp](examples/simplehttp/README.md): Shows how to use [wasi-experimental-http](https://github.com/deislabs/wasi-experimental-http) to make HTTP Requests from modules, there is an example written in AssemblyScript which calls https://postman-echo.com/ ([Source](https://github.com/simongdavies/http-wagi-as)) and an example written in Rust which uses an experimental version of the [Azure SDK for Rust](https://github.com/radu-matei/azure-sdk-for-rust/tree/enable-wasi-experimental-http) to read and write a blob to Azure Storage ([Source](https://github.com/simongdavies/http-azure-rust)).
 - [bindle](examples/bindle/README.md): An example showing how to use [bindle](https://github.com/deislabs/bindle) to provide modules to be hosted by wagi-dotnet.
 - [modules.toml](examples/modules.toml/README.md): shows how to use a [modules.toml](https://github.com/deislabs/wagi/blob/main/docs/configuring_and_running.md#the-modulestoml-configuration-file) configuration file to configure wagi-dotnet.
+- [routes](examples/routes/README.md): shows how to use a module that defines its own routes ([Source](https://github.com/technosophos/hello-wagi)). For details of how to define routes within a module see [the docs here.](https://github.com/deislabs/wagi/blob/main/docs/writing_modules.md#advanced-declaring-sub-routes-in-the-module)
+- [wildcard](examples/wildcard/README.md): shows how to use wildcard routing.
+- [wagipython](examples/wagipython/README.md): Shows how to use python scripts with a wasm python module. This version is running live at https://pythonwasm.azurewebsites.net/.
+- [wagiruby](examples/wagiruby/README.md): Shows how to use ruby scripts with a wasm ruby module. This version is running live at https://rubywasm.azurewebsites.net/.
 
 ### Other examples
 

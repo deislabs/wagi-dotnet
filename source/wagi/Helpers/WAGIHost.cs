@@ -240,7 +240,7 @@ namespace Deislabs.Wagi.Helpers
 
             var script = this.pathInfo;
             var queryStringArgs = this.context.Request.QueryString.Value.TrimStart('?').Replace('&', ' ');
-            var argString = this.argv.Replace("${SCRIPT}", script, StringComparison.InvariantCultureIgnoreCase).Replace("${ARGS}", queryStringArgs, StringComparison.InvariantCultureIgnoreCase).TrimEnd();
+            var argString = this.argv.Replace("${SCRIPT_NAME}", script, StringComparison.InvariantCultureIgnoreCase).Replace("${ARGS}", queryStringArgs, StringComparison.InvariantCultureIgnoreCase).TrimEnd();
             return argString.Split(' ');
         }
 
@@ -353,7 +353,16 @@ namespace Deislabs.Wagi.Helpers
                             sufficientResponse = true;
                             break;
                         default:
-                            this.AddHeader(header.Split(':')[0], new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
+                            try
+                            {
+                                this.AddHeader(header.Split(':')[0], new StringValues(header.Split(':')[1]?.TrimStart().Split(',')));
+                            }
+#pragma warning disable CA1031 // Do not catch general exception types
+                            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                            {
+                                logger.TraceException(ex);
+                            }
                             break;
                     }
                 });

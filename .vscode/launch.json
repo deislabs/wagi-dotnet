@@ -9,9 +9,9 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/examples/modules.toml/bin/Debug/net5.0/modules.toml.dll",
+      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net5.0/wagiruby.dll",
       "args": [ ],
-      "cwd": "${workspaceFolder}/examples/modules.toml",
+      "cwd": "${workspaceFolder}/examples/wagiruby",
       "console": "internalConsole",
       "env":{
         "WASMTIME_BACKTRACE_DETAILS":"1",
@@ -34,9 +34,9 @@
         "WASMTIME_BACKTRACE_DETAILS":"1",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "program": "${workspaceFolder}/examples/modules.toml/bin/Debug/net5.0/modules.toml.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/examples/modules.toml",
+      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net5.0/wagiruby.dll",
+      "args": [ ],
+      "cwd": "${workspaceFolder}/examples/wagiruby",
       "console": "internalConsole",
       "stopAtEntry": false
     }
