@@ -103,8 +103,8 @@
                 var memory = GetMemory(caller);
                 var response = this.GetResponse(handle);
                 var available = Math.Min(Convert.ToInt32(response.Content.Length) - Convert.ToInt32(response.Content.Position), bufferLength);
-                response.Content.Read(memory.GetSpan(caller).Slice(bufferPtr, available));
-                memory.WriteInt32(caller, bufferWrittenPtr, available);
+                response.Content.Read(memory.GetSpan(bufferPtr, available));
+                memory.WriteInt32(bufferWrittenPtr, available);
                 return OK;
             }
             catch (ExperimentalHttpException ex)
@@ -168,7 +168,7 @@
                 var headers = this.GetHttpRequestHeaders(caller, memory, headersPtr, headersLength);
                 var body = this.GetRequestBody(caller, memory, bodyPtr, bodyLength);
                 var httpResponseMessage = this.SendHttpRequest(url, method, headers, body);
-                memory.WriteInt32(caller, statusCodePtr, (int)httpResponseMessage.StatusCode);
+                memory.WriteInt32(statusCodePtr, (int)httpResponseMessage.StatusCode);
                 var handle = Interlocked.Increment(ref this.lastResponse);
                 if (handle > this.maxHttpRequests)
                 {
@@ -177,7 +177,7 @@
 
                 var response = new Response(httpResponseMessage);
                 this.responses.Add(handle, response);
-                memory.WriteInt32(caller, handlePtr, handle);
+                memory.WriteInt32(handlePtr, handle);
                 var message = $"Function req created handle {handle}";
                 this.logger.TraceMessage(message);
                 return OK;
@@ -204,7 +204,7 @@
                 string headerName;
                 try
                 {
-                    headerName = memory.ReadString(caller, namePtr, nameLength);
+                    headerName = memory.ReadString(namePtr, nameLength);
                 }
                 catch (Exception ex)
                 {
@@ -240,8 +240,8 @@
                     throw new BufferTooSmallException($"Header Value for {headerName} Too Big");
                 }
 
-                memory.WriteString(caller, valuePtr, headerValue);
-                memory.WriteInt32(caller, valueWrittenPtr, headerValueLength);
+                memory.WriteString(valuePtr, headerValue);
+                memory.WriteInt32(valueWrittenPtr, headerValueLength);
                 return OK;
             }
             catch (ExperimentalHttpException ex)
@@ -284,8 +284,8 @@
                     throw new BufferTooSmallException(message);
                 }
 
-                memory.WriteString(caller, bufferPtr, allHeaders.ToString());
-                memory.WriteInt32(caller, bufferWrittenPtr, headerValuesLength);
+                memory.WriteString(bufferPtr, allHeaders.ToString());
+                memory.WriteInt32(bufferWrittenPtr, headerValuesLength);
                 return OK;
             }
             catch (ExperimentalHttpException ex)
@@ -306,7 +306,7 @@
             string url;
             try
             {
-                url = memory.ReadString(caller, urlPtr, urlLength);
+                url = memory.ReadString(urlPtr, urlLength);
             }
             catch (Exception ex)
             {
@@ -342,7 +342,7 @@
             string method;
             try
             {
-                method = memory.ReadString(caller, methodPtr, methodLength);
+                method = memory.ReadString(methodPtr, methodLength);
             }
             catch (Exception ex)
             {
@@ -373,7 +373,7 @@
             string headersAsString;
             try
             {
-                headersAsString = memory.ReadString(caller, headersPtr, headersLength);
+                headersAsString = memory.ReadString(headersPtr, headersLength);
             }
             catch (Exception ex)
             {
@@ -407,7 +407,7 @@
             byte[] body;
             try
             {
-                body = memory.GetSpan(caller).Slice(bodyPtr, bodyLength).ToArray();
+                body = memory.GetSpan(bodyPtr, bodyLength).ToArray();
             }
             catch (Exception ex)
             {

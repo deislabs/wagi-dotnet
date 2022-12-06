@@ -1,5 +1,6 @@
 # WAGI-dotnet: WebAssembly Gateway Interface for .Net
 
+
 _WAGI is the easiest way to get started doing cloud-side WebAssembly apps._
 _WAGI-dotnet is the easiest way to host WAGI HTTP Handlers in an ASP.Net Core application._
 
@@ -26,7 +27,7 @@ You can use any programming language that can compile to `WASM32-WASI`.
 
 To make it easy to get started with WAGI-dotnet two nuget packages are provided, the first (Deislabs.WAGI.Templates) contains templates that can be used with the dotnet cli tool. The second pcakage contains runtime extension that enable hosting of WAGI modules in ASP.Net using only configuration.  For full details, checkout out the [documentation](docs/README.md).
 
-WAGI-dotnet requires [.Net 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
+WAGI-dotnet requires [.Net 7 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
 
 To create a ASP.Net Core web application that host a demo WAGI Module:
 
@@ -84,7 +85,7 @@ To build and run the application
 ``` console
 
 dotnet build -c Release
-./bin/Release/net5.0/hello-wagi
+./bin/Release/net7.0/hello-wagi
 
 ```
 

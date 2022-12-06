@@ -7,7 +7,7 @@
     <Authors>Simon Davies</Authors>
     <Description>Templates to use when creating a WASM/WAGI Applications using Deislabs.WAGI.</Description>
     <PackageTags>dotnet-new;templates;WASM;WAGI;WASI;WebAssembly;wasmtime;Bindle</PackageTags>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>CA1014;NU5105;NU5128;0419,0649</NoWarn>
     <IncludeContentInPack>true</IncludeContentInPack>

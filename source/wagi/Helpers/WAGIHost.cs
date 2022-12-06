@@ -101,8 +101,8 @@ namespace Deislabs.Wagi.Helpers
                 {
                     var stopWatch = Stopwatch.StartNew();
                     var instance = linker.Instantiate(store, module);
-                    var entrypoint = instance.GetFunction(store, this.entryPoint);
-                    entrypoint.Invoke(store);
+                    var entrypoint = instance.GetFunction(this.entryPoint);
+                    entrypoint.Invoke();
                     stopWatch.Stop();
                     var elapsed = stopWatch.Elapsed;
                     this.logger.ModuleExecutionTime(this.wasmFile, this.entryPoint, elapsed.TotalSeconds, elapsed.Milliseconds, elapsed.Ticks);

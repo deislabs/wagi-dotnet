@@ -9,7 +9,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/bin/Debug/net5.0/Wagi.Project.dll",
+      "program": "${workspaceFolder}/bin/Debug/net7.0/Wagi.Project.dll",
       "args": [ ],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",
@@ -34,7 +34,7 @@
         "WASMTIME_BACKTRACE_DETAILS":"1",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "program": "${workspaceFolder}/bin/Debug/net5.0/Wagi.Project.dll",
+      "program": "${workspaceFolder}/bin/Debug/net7.0/Wagi.Project.dll",
       "args": [],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",

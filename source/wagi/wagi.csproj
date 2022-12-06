@@ -16,16 +16,16 @@
     <RootNamespace>Deislabs.Wagi</RootNamespace>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Deislabs.Bindle" Version="0.1.0-preview+844b253" />
+    <PackageReference Include="Deislabs.Bindle" Version="0.2.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Tommy" Version="3.1.2" />
-    <PackageReference Include="Wasmtime" Version="0.34.0-preview1" />
+    <PackageReference Include="Wasmtime" Version="2.0.2" />
     <None Include="docs\readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
