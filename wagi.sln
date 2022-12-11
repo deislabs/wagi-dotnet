@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wagiruby", "examples\wagiru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wagiruby.test", "examples\wagiruby.test\wagiruby.test.csproj", "{1D74EE38-501D-4C25-91AD-A259C3A87AA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simplehttp-minimalapi", "examples\simplehttp-minimalapi\simplehttp-minimalapi.csproj", "{DEE97C79-A442-4D45-8187-BF9A20698209}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -311,6 +313,18 @@ Global
 		{1D74EE38-501D-4C25-91AD-A259C3A87AA9}.Release|x64.Build.0 = Release|Any CPU
 		{1D74EE38-501D-4C25-91AD-A259C3A87AA9}.Release|x86.ActiveCfg = Release|Any CPU
 		{1D74EE38-501D-4C25-91AD-A259C3A87AA9}.Release|x86.Build.0 = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|x64.Build.0 = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Debug|x86.Build.0 = Debug|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|x64.ActiveCfg = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|x64.Build.0 = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|x86.ActiveCfg = Release|Any CPU
+		{DEE97C79-A442-4D45-8187-BF9A20698209}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -337,6 +351,7 @@ Global
 		{A2A5077F-DFC0-4B4F-87B0-FBE023E1F1B8} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{C494BEBA-0E2E-4DD7-B7F7-BD725D8C0229} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 		{1D74EE38-501D-4C25-91AD-A259C3A87AA9} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
+		{DEE97C79-A442-4D45-8187-BF9A20698209} = {60AAAB4B-27C6-4EEA-A2E7-8FD3FAAB7747}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF3895D-74E4-4CEC-8C19-CF93A06D9F0A}
