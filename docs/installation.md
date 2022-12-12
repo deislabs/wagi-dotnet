@@ -4,7 +4,7 @@ The WAGI extension is installed using nuget. There are 2 nuget packages, one con
 
 ## Prerequisites
 
-- [.Net 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
+- [.Net 7 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
 
 ## Install the WAGI extension package
 

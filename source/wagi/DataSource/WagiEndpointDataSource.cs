@@ -234,8 +234,8 @@ namespace Deislabs.Wagi.DataSource
             store.SetWasiConfiguration(config);
             linker.DefineWasi();
             var instance = linker.Instantiate(store, wasmModule);
-            var entrypoint = instance.GetFunction(store, RoutesEntryPoint);
-            entrypoint.Invoke(store);
+            var entrypoint = instance.GetFunction(RoutesEntryPoint);
+            entrypoint.Invoke();
             using var stdoutStream = new FileStream(stdout.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var reader = new StreamReader(stdoutStream);
             string line;

@@ -1,12 +1,13 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "simplehttp": {
+    "http": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "weatherforecast",
       "applicationUrl": "http://localhost:8888",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "WASMTIME_BACKTRACE_DETAILS": "1"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

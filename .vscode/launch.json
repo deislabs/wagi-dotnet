@@ -9,7 +9,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net5.0/wagiruby.dll",
+      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net7.0/wagiruby.dll",
       "args": [ ],
       "cwd": "${workspaceFolder}/examples/wagiruby",
       "console": "internalConsole",
@@ -34,7 +34,7 @@
         "WASMTIME_BACKTRACE_DETAILS":"1",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net5.0/wagiruby.dll",
+      "program": "${workspaceFolder}/examples/wagiruby/bin/Debug/net7.0/wagiruby.dll",
       "args": [ ],
       "cwd": "${workspaceFolder}/examples/wagiruby",
       "console": "internalConsole",
