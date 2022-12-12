@@ -1,6 +1,5 @@
 # WAGI-dotnet: WebAssembly Gateway Interface for .Net
 
-
 _WAGI is the easiest way to get started doing cloud-side WebAssembly apps._
 _WAGI-dotnet is the easiest way to host WAGI HTTP Handlers in an ASP.Net Core application._
 
