@@ -22,6 +22,6 @@
 
 
     <PropertyGroup Condition=" '$(Configuration)' != 'Release'">
-        <WarningsNotAsErrors>IDE0055</WarningsNotAsErrors>
+        <WarningsNotAsErrors>IDE0055;CA1854;CA1852</WarningsNotAsErrors>
     </PropertyGroup>
 </Project>
