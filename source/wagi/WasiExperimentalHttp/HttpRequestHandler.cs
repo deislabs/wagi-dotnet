@@ -59,11 +59,17 @@
             this.maxHttpRequests = maxHttpRequests;
             this.responses = new Dictionary<int, Response>();
 
-            linker.Define(ModuleName, "body_read", Function.FromCallback<Caller, int, int, int, int, int>(store, this.ReadBody));
-            linker.Define(ModuleName, "close", Function.FromCallback<Caller, int, int>(store, this.Close));
-            linker.Define(ModuleName, "req", Function.FromCallback<Caller, int, int, int, int, int, int, int, int, int, int, int>(store, this.Request));
-            linker.Define(ModuleName, "header_get", Function.FromCallback<Caller, int, int, int, int, int, int, int>(store, this.GetHeader));
-            linker.Define(ModuleName, "headers_get_all", Function.FromCallback<Caller, int, int, int, int, int>(store, this.GetAllHeaders));
+            CallerFunc<int, int, int, int, int> readBody = this.ReadBody;
+            CallerFunc<int, int> close = this.Close;
+            CallerFunc<int, int, int, int, int, int, int, int, int, int, int> request = this.Request;
+            CallerFunc<int, int, int, int, int, int, int> getHeader = this.GetHeader;
+            CallerFunc<int, int, int, int, int> getAllHeaders = this.GetAllHeaders;
+
+            linker.Define(ModuleName, "body_read", function: Function.FromCallback(store, readBody));
+            linker.Define(ModuleName, "close", Function.FromCallback(store, close));
+            linker.Define(ModuleName, "req", Function.FromCallback(store, request));
+            linker.Define(ModuleName, "header_get", Function.FromCallback(store, getHeader));
+            linker.Define(ModuleName, "headers_get_all", Function.FromCallback(store, getAllHeaders));
         }
 
         public void Dispose()
