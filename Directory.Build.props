@@ -16,7 +16,7 @@
         <WarningsNotAsErrors>CA1854;CA1852</WarningsNotAsErrors>
     </PropertyGroup>
     <PropertyGroup>
-        <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
+        <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
         <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     </PropertyGroup>
 
