@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Tommy" Version="3.1.2" />
-    <PackageReference Include="Wasmtime" Version="8.0.0" />
+    <PackageReference Include="Wasmtime" Version="9.0.2" />
     <None Include="docs\readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
